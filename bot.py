@@ -1,5 +1,5 @@
 import logging
-# import os
+import os
 from telegram import (
     Update,
     InlineKeyboardButton,
@@ -34,6 +34,11 @@ from constants import HELP_TEXT
 
 # def run_flask():
 #     app.run(host='0.0.0.0', port=3000)
+from dotenv import load_dotenv
+
+load_dotenv()
+VYBE_API_KEY = os.getenv("VYBE_API_KEY")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -188,7 +193,7 @@ async def handle_alert_input(update: Update, context: CallbackContext):
 
 def main():
     # PORT = int(os.environ.get('PORT', 8443)) #for railway?
-    application = Application.builder().token(Config.TELEGRAM_TOKEN).build()
+    application = Application.builder().token(TELEGRAM_TOKEN).build()
     
     # Handlers
     conv_handler = ConversationHandler(
@@ -203,8 +208,8 @@ def main():
     #     application.run_webhook(
     #         listen="0.0.0.0",
     #         port=PORT,
-    #         url_path=Config.TELEGRAM_TOKEN,
-    #         webhook_url=f"https://{os.environ['RAILWAY_STATIC_URL']}/{Config.TELEGRAM_TOKEN}"
+    #         url_path=TELEGRAM_TOKEN,
+    #         webhook_url=f"https://{os.environ['RAILWAY_STATIC_URL']}/{TELEGRAM_TOKEN}"
     #     )
     # else:
     #     application.run_polling()
