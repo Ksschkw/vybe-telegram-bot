@@ -1,36 +1,46 @@
 import requests
 from config import Config
-from dotenv import load_dotenv
-import os
+import logging
 
-load_dotenv()
-VYBE_API_KEY = os.getenv("VYBE_API_KEY")
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+logger = logging.getLogger(__name__)
+
 class VybeAPI:
     def __init__(self):
         self.base_url = "https://api.vybenetwork.com/v1"
-        self.headers = {"Authorization": f"Bearer {VYBE_API_KEY}"}
+        self.headers = {"Authorization": f"Bearer {Config.VYBE_API_KEY}"}
 
     def _get(self, endpoint, params=None):
-        return requests.get(f"{self.base_url}/{endpoint}", headers=self.headers, params=params).json()
+        try:
+            response = requests.get(f"{self.base_url}/{endpoint}", 
+                                  headers=self.headers, 
+                                  params=params)
+            response.raise_for_status()
+            return response.json()
+        except Exception as e:
+            logger.error(f"Vybe API Error: {str(e)}")
+            return None
 
-    def get_wallet_balance(self, address):
-        return self._get(f"wallets/{address}/balance")
+    # Account Endpoints
+    def get_token_balance(self, owner_address):
+        return self._get(f"account/token-balance/{owner_address}")
     
-    def get_portfolio(self, address):
-        return self._get(f"wallets/{address}/portfolio")
+    def get_nft_balance(self, owner_address):
+        return self._get(f"account/nft-balance/{owner_address}")
     
-    def get_token_metrics(self, contract):
-        return self._get(f"tokens/{contract}/metrics")
+    def get_known_accounts(self):
+        return self._get("account/known-accounts")
     
-    def get_whale_transactions(self, min_value):
-        return self._get("transactions/whales", {"min_value": min_value})
+    # Token Endpoints
+    def get_token_details(self, mint_address):
+        return self._get(f"token/{mint_address}")
     
-    def get_nft_holdings(self, address):
-        return self._get(f"wallets/{address}/nfts")
+    def get_top_holders(self, mint_address):
+        return self._get(f"token/{mint_address}/top-holders")
     
-    def get_gas_prices(self):
-        return self._get("network/gas")
+    # Price Endpoints
+    def get_token_price(self, mint_address):
+        return self._get(f"price/{mint_address}/token-ohlcv")
     
-    def get_dex_trades(self, token):
-        return self._get(f"dex/{token}/trades")
+    # Program Endpoints
+    def get_program_details(self, program_id):
+        return self._get(f"program/{program_id}")
