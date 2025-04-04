@@ -169,7 +169,8 @@ def main():
         application.run_webhook(
             listen="0.0.0.0",
             port=int(os.environ.get("PORT", 8443)),
-            webhook_url=f"https://{os.environ['RAILWAY_STATIC_URL']}/webhook"
+            webhook_url=os.getenv("RAILWAY_PUBLIC_URL", "https://vybe-telegram-bot-production.up.railway.app") + "/webhook"
+
         )
     else:
         application.run_polling()
