@@ -1,10 +1,15 @@
 import requests
 from config import Config
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+VYBE_API_KEY = os.getenv("VYBE_API_KEY")
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 class VybeAPI:
     def __init__(self):
         self.base_url = "https://api.vybenetwork.com/v1"
-        self.headers = {"Authorization": f"Bearer {Config.VYBE_API_KEY}"}
+        self.headers = {"Authorization": f"Bearer {VYBE_API_KEY}"}
 
     def _get(self, endpoint, params=None):
         return requests.get(f"{self.base_url}/{endpoint}", headers=self.headers, params=params).json()
