@@ -11,7 +11,7 @@ load_dotenv()
 # Config
 TELEGRAM_TOKEN =  os.getenv("TELEGRAM_TOKEN")
 VYBE_API_KEY=  os.getenv("VYBE_API_KEY")
-VYBE_API_URL = "https://api.vybenetwork.xyz/account/known-accounts"
+VYBE_API_URL = "https://api.vybenetwork.xyz/account"
 
 # Start Command
 async def start(update: Update, context: CallbackContext) -> None:
