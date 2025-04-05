@@ -8,7 +8,7 @@ VYBE_API_KEY = os.getenv("VYBE_API_KEY")
 VYBE_BASE_URL = "https://api.vybenetwork.xyz"
 
 async def get_wallet_balance(wallet_address):
-    url = f"{VYBE_BASE_URL}/account/balance/{wallet_address}"
+    url = f"{VYBE_BASE_URL}/account/token-balance-ts/{wallet_address}"
     headers = {"X-API-KEY": VYBE_API_KEY}
     
     try:
