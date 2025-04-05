@@ -10,7 +10,7 @@ VYBE_API_KEY = os.getenv("VYBE_API_KEY")
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.re_text("🚀 Vybe Analytics Bot Activated!\n\n"
+    await update.message.reply_text("🚀 Vybe Analytics Bot Activated!\n\n"
                                "Available commands:\n"
                                "/balance <wallet> - Check wallet balance\n"
                                "/prices <token> - Get token prices\n"
