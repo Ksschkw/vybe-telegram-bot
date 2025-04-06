@@ -24,7 +24,7 @@ async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     token_mint = context.args[0]
     token_info = await utils.get_token_details(token_mint)
-    await update.message.reply_text(token_info)
+    await update.message.reply_text(token_info.text)
 async def get_balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     wallet_address = context.args[0] if context.args else None
     if not wallet_address:
@@ -52,7 +52,7 @@ async def check_prices(update: Update, context: ContextTypes.DEFAULT_TYPE):
     #     return
     # token_mint = context.args[0]
     price_info = await utils.get_token_price()
-    await update.message.reply_text(price_info)
+    await update.message.reply_text(price_info.text)
 
 if __name__ == "__main__":
     app = Application.builder().token(TELEGRAM_TOKEN).build()
