@@ -55,9 +55,9 @@ async def detect_whale_transfers(min_amount: float = 1000):
     except Exception as e:
         return f"⚠️ Whale detection failed: {str(e)}"
     
-async def get_token_price(token_mint: str):
+async def get_token_price():
     """Get token price with robust error checking"""
-    url = f"{VYBE_BASE_URL}/v1/tokens/{token_mint}"
+    url = f"{VYBE_BASE_URL}/tokens"
     headers = {"X-API-KEY": VYBE_API_KEY}
     
     try:
@@ -97,8 +97,8 @@ async def get_token_details(mintAdress):
         data = response.json()
         
         # Validate response structure
-        if not all(key in data for key in ['symbol', 'name', 'decimals']):
-            return "⚠️ Invalid token data format from API"
+        # if not all(key in data for key in ['symbol', 'name', 'decimals']):
+        #     return "⚠️ Invalid token data format from API"
             
         return (
             f"📊 {data['symbol']} ({data['name']})\n"

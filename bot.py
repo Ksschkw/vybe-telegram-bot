@@ -13,7 +13,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🚀 Vybe Analytics Bot Activated!\n\n"
                                "Available commands:\n"
                                "/balance <wallet> - Check wallet balance\n"
-                               "/prices <token> - Get token prices\n"
+                               "/prices  - Get token prices\n"
                                "/whalealert - Latest large transactions\n"
                                "/tokenDetails <mintAdress> - Get token details\n")
 async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -45,14 +45,13 @@ async def whale_alert(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except ValueError:
         await update.message.reply_text("❌ Invalid threshold. Use /whalealert 500")
 # Add this to your existing bot.py
-async def check_price(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def check_prices(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /prices command"""
-    if not context.args:
-        await update.message.reply_text("⚠️ Please provide a token mint address\nExample: /prices EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
-        return
-    
-    token_mint = context.args[0]
-    price_info = await utils.get_token_price(token_mint)
+    # if not context.args:
+    #     await update.message.reply_text("⚠️ Please provide a token mint address\nExample: /prices EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
+    #     return
+    # token_mint = context.args[0]
+    price_info = await utils.get_token_price()
     await update.message.reply_text(price_info)
 
 if __name__ == "__main__":
@@ -62,7 +61,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("balance", get_balance))
     app.add_handler(CommandHandler("whalealert", whale_alert))
-    app.add_handler(CommandHandler("prices", check_price))
+    app.add_handler(CommandHandler("prices", check_prices))
     app.add_handler(CommandHandler("tokenDetails", token_details))
 
 
