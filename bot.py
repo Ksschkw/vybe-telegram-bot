@@ -14,8 +14,17 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                "Available commands:\n"
                                "/balance <wallet> - Check wallet balance\n"
                                "/prices <token> - Get token prices\n"
-                               "/whalealert - Latest large transactions")
-
+                               "/whalealert - Latest large transactions"
+                               "/tokedDetails <mintAdress> - Get token details\n")
+async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /tokenDetails command"""
+    if not context.args:
+        await update.message.reply_text("⚠️ Please provide a token mint address\nExample: /tokenDetails EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
+        return
+    
+    token_mint = context.args[0]
+    token_info = await utils.get_token_details(token_mint)
+    await update.message.reply_text(token_info)
 async def get_balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     wallet_address = context.args[0] if context.args else None
     if not wallet_address:
@@ -54,6 +63,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("balance", get_balance))
     app.add_handler(CommandHandler("whalealert", whale_alert))
     app.add_handler(CommandHandler("prices", check_price))
+    app.add_handler(CommandHandler("tokenDetails", token_details))
 
 
     

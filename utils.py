@@ -85,3 +85,31 @@ async def get_token_price(token_mint: str):
         return f"🔧 Missing data field: {str(e)}"
     except Exception as e:
         return f"🚨 Unexpected error: {str(e)}"
+    
+async def get_token_details(mintAdress):
+    """Get token details using Vybe's token endpoint"""
+    url = f"{VYBE_BASE_URL}/token/{mintAdress}"
+    headers = {"X-API-KEY": VYBE_API_KEY}
+    
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        data = response.json()
+        
+        # Validate response structure
+        if not all(key in data for key in ['symbol', 'name', 'decimals']):
+            return "⚠️ Invalid token data format from API"
+            
+        return (
+            f"📊 {data['symbol']} ({data['name']})\n"
+            f"Decimals: {data['decimals']}"
+        )
+        
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            return "❌ Token not found - check mint address"
+        return f"⚠️ API Error: {e.response.status_code}"
+    except KeyError as e:
+        return f"🔧 Missing data field: {str(e)}"
+    except Exception as e:
+        return f"🚨 Unexpected error: {str(e)}"
