@@ -14,7 +14,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                "Available commands:\n"
                                "/balance <wallet> - Check wallet balance\n"
                                "/prices <token> - Get token prices\n"
-                               "/whalealert - Latest large transactions"
+                               "/whalealert - Latest large transactions\n"
                                "/tokedDetails <mintAdress> - Get token details\n")
 async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /tokenDetails command"""
