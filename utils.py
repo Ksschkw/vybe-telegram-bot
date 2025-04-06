@@ -56,20 +56,32 @@ async def detect_whale_transfers(min_amount: float = 1000):
         return f"⚠️ Whale detection failed: {str(e)}"
     
 async def get_token_price(token_mint: str):
-    url = f"{VYBE_BASE_URL}/tokens/{token_mint}"
+    """Get token price with robust error checking"""
+    url = f"{VYBE_BASE_URL}/v1/tokens/{token_mint}"
     headers = {"X-API-KEY": VYBE_API_KEY}
     
     try:
         response = requests.get(url, headers=headers)
+        response.raise_for_status()  # Check HTTP errors
         data = response.json()
         
+        # Validate response structure
+        if not all(key in data for key in ['symbol', 'name', 'price']):
+            return "⚠️ Invalid token data format from API"
+            
         return (
             f"📊 {data['symbol']} ({data['name']})\n"
             f"Price: ${data['price']:.4f}\n"
-            f"24h Change: {data['change_24h']:.2f}%\n"
-            f"Volume: ${data['volume_24h']:,.2f}\n"
-            f"Market Cap: ${data['market_cap']:,.2f}"
-            f"🔗 Vybe Analytics: https://alpha.vybenetwork.com/token/{token_mint}"
+            f"24h Change: {data.get('change_24h', 0):.2f}%\n"
+            f"Volume: ${data.get('volume_24h', 0):,.2f}\n"
+            f"Market Cap: ${data.get('market_cap', 0):,.2f}"
         )
+        
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 404:
+            return "❌ Token not found - check mint address"
+        return f"⚠️ API Error: {e.response.status_code}"
+    except KeyError as e:
+        return f"🔧 Missing data field: {str(e)}"
     except Exception as e:
-        return f"❌ Price check failed: {str(e)}"
+        return f"🚨 Unexpected error: {str(e)}"
