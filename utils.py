@@ -69,6 +69,7 @@ async def get_token_price(token_mint: str):
             f"24h Change: {data['change_24h']:.2f}%\n"
             f"Volume: ${data['volume_24h']:,.2f}\n"
             f"Market Cap: ${data['market_cap']:,.2f}"
+            f"🔗 Vybe Analytics: https://alpha.vybenetwork.com/token/{token_mint}"
         )
     except Exception as e:
         return f"❌ Price check failed: {str(e)}"

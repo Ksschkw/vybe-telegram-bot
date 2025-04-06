@@ -35,6 +35,16 @@ async def whale_alert(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     except ValueError:
         await update.message.reply_text("❌ Invalid threshold. Use /whalealert 500")
+# Add this to your existing bot.py
+async def check_price(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /prices command"""
+    if not context.args:
+        await update.message.reply_text("⚠️ Please provide a token mint address\nExample: /prices EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v")
+        return
+    
+    token_mint = context.args[0]
+    price_info = await utils.get_token_price(token_mint)
+    await update.message.reply_text(price_info)
 
 if __name__ == "__main__":
     app = Application.builder().token(TELEGRAM_TOKEN).build()
@@ -43,6 +53,8 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("balance", get_balance))
     app.add_handler(CommandHandler("whalealert", whale_alert))
+    app.add_handler(CommandHandler("prices", check_price))
+
 
     
     # Start polling
