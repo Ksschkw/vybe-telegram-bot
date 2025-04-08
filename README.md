@@ -1,109 +1,93 @@
-🔮 Vybe Analytics Telegram Bot
-A feature-rich Telegram bot that delivers real-time, actionable crypto insights using the Vybe API. Built for crypto traders, investors, and community mods looking for on-chain alpha, whale alerts, and wallet tracking—right in their Telegram chats.
 
-🚀 Created for the Vybe Telegram Bot Challenge, this bot empowers communities with plug-and-play crypto analytics, fully open-source and ready to scale.
+# 🚀 Vybe Analytics Telegram Bot
 
-🧠 Features
-✅ Real-time Analytics:
-Wallet Overview
-/wallet <wallet_address> — Get SOL balance, token count, staked amount, and wallet value.
+Vybe Analytics Telegram Bot is a powerful Telegram bot that provides real-time, on-chain insights using Vybe Network APIs. From tracking wallet balances to showing the top token holders and whale alerts, this bot delivers instant analytics to any Telegram user.
 
-Whale Alerts
-/whales <cap> — Detect large transfers on-chain above a specified USD value.
+## 📌 Features
 
-Token Metrics
-/prices <count> — List live token prices, market caps, and supply data.
+- 💼 **Wallet Balance**: Check the balance of any Solana wallet.
+- 💰 **Token Prices**: Get real-time token price and USD value.
+- 🐳 **Whale Alerts**: View the latest large token transfers.
+- 📊 **Token Details**: Retrieve full details about any token by its mint address.
+- 👑 **Top Token Holders**: View the richest wallets holding a particular token.
+<!-- - 🖼️ Token logos and owner logos included for visual context. -->
 
-Token Lookup
-/token <mint_address> — Fetch detailed metrics of any token.
+## 🛠️ Installation
 
-Top Token Holders
-/holders <mint_address> <count> — List top holders of any token by balance.
+1. Clone the repo:
 
-🔐 Powered by Vybe APIs
-Fast and reliable endpoints with real-time blockchain indexing.
-
-Asynchronous implementation with proper error handling.
-
-🔧 Setup
-1. Clone the Repo
-bash
-Copy
-Edit
-git clone https://github.com/yourusername/vybe-telegram-bot.git
+```bash
+git clone https://github.com/your-username/vybe-telegram-bot.git
 cd vybe-telegram-bot
-2. Install Dependencies
-Make sure Python 3.8+ is installed.
+```
 
-bash
-Copy
-Edit
+2. Install the dependencies:
+
+```bash
 pip install -r requirements.txt
-3. Configure Environment Variables
-Create a .env file in the root directory:
+```
 
-env
-Copy
-Edit
-TELEGRAM_BOT_TOKEN=your_telegram_bot_token
-VYBE_API_KEY=your_vybe_api_key
-🛡️ Get your Vybe API key by messaging @ericvybes on Telegram.
+3. Add your credentials:
+   - Get a **Vybe API key** from [Vbenetwork](https://docs.vybenetwork.com/docs/getting-started).
+   - Get a **Telegram Bot Token** from [@BotFather](https://t.me/BotFather).
+   - Store these in a `.env` file or your preferred config method.
 
-▶️ Run the Bot
-bash
-Copy
-Edit
+```
+VYBE_API_KEY=your_api_key
+TELEGRAM_BOT_TOKEN=your_bot_token
+```
+
+4. Run the bot:
+
+```bash
 python bot.py
-The bot will start and respond to commands on Telegram.
+```
 
-💬 Commands & Examples
-Command	Description	Example
-/wallet <address>	Get wallet balance and activity	/wallet FJrH...n4rR
-/whales <cap>	Show whale transfers over USD cap	/whales 5000
-/prices <count>	Show top token prices	/prices 5
-/token <mint_address>	Detailed token info	/token So11111111111111111111111111111111111111112
-/holders <mint_address> <count>	Top token holders	/holders So111...1112 10
-⚙️ Project Structure
-bash
-Copy
-Edit
-.
-├── bot.py          # Telegram bot core logic
-├── utils.py        # API integrations and formatting
-├── .env            # Environment variables (not committed)
-├── requirements.txt
-└── README.md       # This file!
-✨ Innovation Highlights
-Uses Vybe’s full suite of APIs to provide token, wallet, and transfer intelligence.
+## 🤖 Bot Commands
 
-Modular, async architecture built for speed and extensibility.
+```
+/start - Show available commands and intro
+/balance <wallet_address> - Get wallet token balances
+/prices <token_mint> [amount] - Get token price and USD value
+/whalealert [threshold] [limit] - Show recent large transactions
+/tokendetails <mint_address> - Get metadata of a token
+/toptokenholders <mint_address> - Show top holders of the token
+```
 
-Focused on community empowerment with actionable Telegram-native insights.
+## 🧠 How It Works
 
-Pluggable design ready for commercial integration or community bot deployments.
+- Uses Vybe API endpoints like `/balance`, `/price`, `/token-details`, `/top-holders`, and `/whale-alert`.
+- Formats block time into human-readable format using Python's datetime.
+- Uses `python-telegram-bot` for asynchronous, user-friendly bot behavior.
+<!-- - Token logos and owner logos are embedded via direct URL (Telegram supports image previews). -->
 
-🏁 Deployment & Scalability
-This bot is fully compatible with cloud deployment options like:
+## 📷 Screenshots
 
-Railway
+| Whale Alerts | Top Holders |
+|--------------|-------------|
+| ![Whale](imagesforreadme\whales.png) | ![TopHolders](imagesforreadme\topholders.png) |
 
-Render
+## 💡 Innovation Highlights
 
-AWS Lambda
+- Combines several endpoints into a compact UX.
+- Displays both raw data and formatted insights.
+- Designed for real-world, commercial-ready use.
 
-Fly.io
+## 🏁 Getting Your Vybe API Key
 
-Docker containers
+Visit [Vybenetwork](https://docs.vybenetwork.com/docs/getting-started) read the instructions and get your **API key**.
 
-Just plug in your environment variables and deploy.
+## 📜 License
 
-📜 License
-This project is open-source under the MIT License.
+MIT License - free to use and modify. See `LICENSE` file for details.
 
-👨‍💻 Contributors
-You! 🚀
+## 📬 Submit Your Entry
 
-Built for the Vybe Telegram Bot Challenge
+- Publish your repo with an open-source license
+- Include a 200-word project summary in your submission
+- Provide the deployed Telegram bot link
+- Make sure the README is complete and clear
 
-🧪 Live Demo
-👉 Try the bot on Telegram @VybeVigil_bot
+---
+
+Made with 💙 using [Vybe Network](https://vybenetwork.xyz)
