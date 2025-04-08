@@ -4,6 +4,9 @@ import utils
 import os
 from dotenv import load_dotenv
 from datetime import datetime
+import time
+import aiohttp
+
 
 
 load_dotenv()
@@ -19,6 +22,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                "🐋 /whalealert <threshold(optional)> [alert count(optional)] - Latest large transactions\n"
                                "🔎 /tokendetails <mintAdress> - Get token details\n"
                                "👑 /topholders <mintAdress> [count(optional)] - View top holders of a token\n"
+                               "📊 /chart <mint_address> - get the price chart.\n"
+                               "🖼 /nft_stats <collection_address> - Get NFT collection statistics\n"
                                )
     
 async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -156,6 +161,58 @@ async def top_token_holders(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print(f"Error in /topholders: {e}")
         await update.message.reply_text("❌ An error occurred while fetching top holders.")
 
+async def chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if len(context.args) != 1:
+        await update.message.reply_text("Usage: /chart <mint_address>")
+        return
+
+    mint_address = context.args[0]
+    resolution = '1d'  # Daily data points
+    time_end = int(time.time())
+    time_start = time_end - (30 * 24 * 60 * 60)  # Last 30 days
+
+    try:
+        ohlcv_data = await utils.fetch_ohlcv_data(mint_address, resolution, time_start, time_end)
+        if not ohlcv_data:
+            await update.message.reply_text("No data available for the provided mint address.")
+            return
+
+        chart_image = await utils.generate_price_chart(ohlcv_data)
+        await update.message.reply_photo(photo=chart_image)
+    except aiohttp.ClientResponseError as e:
+        await update.message.reply_text(f"Failed to fetch data: {e}")
+    except Exception as e:
+        await update.message.reply_text(f"An error occurred: {e}")
+    
+# NFT Collection Statistics
+async def nft_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    # Fetch the NFT collection owners
+    collection_address = context.args[0] if context.args else None
+    owners_data = await utils.fetch_nft_collection_owners(collection_address)
+    
+    if owners_data is None:
+        await update.message.reply_text("😕Failed to retrieve data. Please check the collection address.")
+        return
+    
+    # Analyze the data
+    owners = owners_data.get('owners', [])
+    stats = utils.analyze_nft_owners(owners)
+    
+    # Format the response
+    response = (
+        f"NFT Collection Statistics for {collection_address}:\n"
+        f"Total Unique Owners: {stats['total_owners']}\n"
+        f"Concentration of Holdings:\n"
+    )
+    
+    for owner, count in stats['concentration'].items():
+        response += f"- {owner}: {count} NFTs\n"
+    
+    await update.message.reply_text(response)
+
+# REALTIME / WEBSOCKET 
+
+
 if __name__ == "__main__":
     app = Application.builder().token(TELEGRAM_TOKEN).build()
     
@@ -166,6 +223,8 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("prices", check_prices))
     app.add_handler(CommandHandler("tokenDetails", token_details))
     app.add_handler(CommandHandler("topholders", top_token_holders))
+    app.add_handler(CommandHandler("chart", chart))
+    app.add_handler(CommandHandler("nft_stats", nft_stats))
 
 
     

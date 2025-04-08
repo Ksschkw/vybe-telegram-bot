@@ -1,14 +1,18 @@
-from datetime import datetime
+from datetime import datetime, UTC
 import requests
 import os
 from dotenv import load_dotenv
 import json
 import aiohttp
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from io import BytesIO
 
 # Load environment variables
 load_dotenv()
 VYBE_API_KEY = os.getenv("VYBE_API_KEY")
 VYBE_BASE_URL = "https://api.vybenetwork.xyz"
+VYBE_API_URL = "https://api.vybenetwork.xyz/price"
 
 async def get_wallet_balance(wallet_address):
     """Get and format wallet balance in user-friendly way"""
@@ -246,3 +250,89 @@ async def get_top_token_holders(mint_address: str, count: int = 10):
             data = await response.json()
 
     return data.get("data", [])[:count]
+
+# HISTORICAL CHART
+async def fetch_ohlcv_data(mint_address, resolution, time_start, time_end):
+    """
+    Fetches OHLCV data from Vybe's API asynchronously.
+
+    Parameters:
+    - mint_address (str): The token's mint address.
+    - resolution (str): Timeframe for each data point (e.g., '1h' for hourly).
+    - time_start (int): Start time in Unix timestamp.
+    - time_end (int): End time in Unix timestamp.
+
+    Returns:
+    - list: A list of OHLCV data points.
+    """
+    url = f"{VYBE_API_URL}/{mint_address}/token-ohlcv"
+    headers = {
+        "accept": "application/json",
+        "X-API-KEY": VYBE_API_KEY
+    }
+    params = {
+        "resolution": resolution,
+        "timeStart": time_start,
+        "timeEnd": time_end
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=headers, params=params) as response:
+            response.raise_for_status()
+            data = await response.json()
+            return data.get("data", [])
+        
+async def generate_price_chart(ohlcv_data):
+    """
+    Generates a price chart from OHLCV data asynchronously.
+
+    Parameters:
+    - ohlcv_data (list): A list of OHLCV data points.
+
+    Returns:
+    - BytesIO: In-memory image file of the generated chart.
+    """
+    # Convert timestamps to timezone-aware datetime objects
+    dates = [datetime.fromtimestamp(item['time'], tz=UTC) for item in ohlcv_data]
+    closes = [float(item['close']) for item in ohlcv_data]
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(dates, closes, label='Close Price', color='blue')
+    plt.xlabel('Date')
+    plt.ylabel('Price (USD)')
+    plt.title('Token Price Over Time')
+    plt.legend()
+    plt.grid(True)
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+    plt.gcf().autofmt_xdate()
+
+    image_stream = BytesIO()
+    plt.savefig(image_stream, format='png')
+    plt.close()
+    image_stream.seek(0)
+    return image_stream
+
+# NFT Collection Statistics
+
+async def fetch_nft_collection_owners(collection_address):
+    url = f"https://api.vybenetwork.com/nft/collection-owners/{collection_address}"
+    headers = {
+        "accept": "application/json",
+        "X-API-KEY": VYBE_API_KEY
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=headers) as response:
+            if response.status == 200:
+                return await response.json()
+            else:
+                return None
+            
+async def analyze_nft_owners(owners):
+    unique_owners = set(owners)
+    total_owners = len(unique_owners)
+    concentration = {owner: owners.count(owner) for owner in unique_owners}
+    
+    return {
+        "total_owners": total_owners,
+        "concentration": concentration
+    }
+
