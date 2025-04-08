@@ -81,13 +81,13 @@ Visit [Vybenetwork](https://docs.vybenetwork.com/docs/getting-started) read the 
 
 MIT License - free to use and modify. See `LICENSE` file for details.
 
-## 📬 Submit Your Entry
+<!-- ## 📬 Submit Your Entry
 
 - Publish your repo with an open-source license
 - Include a 200-word project summary in your submission
 - Provide the deployed Telegram bot link
 - Make sure the README is complete and clear
 
----
+--- -->
 
-Made with 💙 using [Vybe Network](https://vybenetwork.xyz)
+Made with 💙 by [Kosisochukwu](https://kosisochukwu.onrender.com) using [Vybe Network](https://vybenetwork.xyz)
