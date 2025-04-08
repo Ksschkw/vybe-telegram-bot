@@ -262,6 +262,15 @@ async def get_top_token_holders(mint_address: str, count: int = 10):
 
     return data.get("data", [])[:count]
 
+# TEESTING SOMETHING
+async def get_token_name_for_chart(mintAddress):
+    """Get token details with formatted output"""
+    url = f"{VYBE_BASE_URL}/token/{mintAddress}"
+    headers = {"X-API-KEY": VYBE_API_KEY, "accept": "application/json"}
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    data = response.json()
+    return f" {data.get('name', 'Unknown Token')}"
 # HISTORICAL CHART
 async def fetch_ohlcv_data(mint_address, resolution, time_start, time_end):
     """

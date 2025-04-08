@@ -184,6 +184,8 @@ async def chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         chart_image = await utils.generate_price_chart(ohlcv_data)
+        token_name = await utils.get_token_name_for_chart(mint_address)
+        await update.message.reply_text(f"{token_name}📈 Price Chart:")
         await update.message.reply_photo(photo=chart_image)
     except aiohttp.ClientResponseError as e:
         await update.message.reply_text(f"Failed to fetch data: {e}")

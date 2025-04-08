@@ -52,6 +52,8 @@ python bot.py
 /whalealert [threshold] [limit] - Show recent large transactions
 /tokendetails <mint_address> - Get metadata of a token
 /toptokenholders <mint_address> - Show top holders of the token
+📊 /chart <mint_address> - get the price chart for a specified mint address.
+🖼 /nft_analysis <collection_address> - Get NFT collection statistics
 ```
 
 ## 🧠 How It Works
@@ -63,9 +65,9 @@ python bot.py
 
 ## 📷 Screenshots
 
-| Whale Alerts | Top Holders |
-|--------------|-------------|
-| ![Whale](imagesforreadme/whales.png) | ![TopHolders](imagesforreadme/topholders.png) |
+| Whale Alerts | Top Holders | chart | Top Holders |
+|--------------|-------------|-------------|
+| ![Whale](imagesforreadme/whales.png) | ![TopHolders](imagesforreadme/topholders.png) |![Chart](imagesforreadme/chart.png)|
 
 ## 💡 Innovation Highlights
 
