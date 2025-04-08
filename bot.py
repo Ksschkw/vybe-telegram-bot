@@ -23,7 +23,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                "🔎 /tokendetails <mintAdress> - Get token details\n"
                                "👑 /topholders <mintAdress> [count(optional)] - View top holders of a token\n"
                                "📊 /chart <mint_address> - get the price chart.\n"
-                               "🖼 /nft_stats <collection_address> - Get NFT collection statistics\n"
+                               "🖼 /nft_analysis <collection_address> - Get NFT collection statistics\n"
                                )
     
 async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -67,22 +67,26 @@ async def whale_alert(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Slice the list to only include the desired number of alerts (or all that are available)
         alerts = alerts[:alert_count]
         if alerts:
-            message = f"🔔 Whale Transfers (> {threshold} USD):\n\n"
+            message = (
+                f"🔔 Whale Transfers (> {threshold} USD):\n\n"
+                f"🔔 [Track Whales Live](https://alpha.vybenetwork.com/wallets/whales?order=totalSum&desc=true&preset=SOL+Whales\n\n"
+            )
+
             for transfer in alerts:
-                    # Convert blockTime to human-readable format
+                    # Convert updateTime to human-readable format
                 block_time = transfer.get('blockTime')
                 if block_time:
                     readable_time = datetime.fromtimestamp(block_time).strftime('%Y-%m-%d %H:%M:%S')
                 else:
                     readable_time = 'N/A'
                 message += (
-                    f"🔑 Signature: {transfer.get('signature', 'N/A')}\n"
-                    f"📤 Sender: {transfer.get('senderAddress', 'N/A')}\n"
-                    f"📥 Receiver: {transfer.get('receiverAddress', 'N/A')}\n"
-                    f"💰 Amount (raw): {transfer.get('amount', 'N/A')}\n"
-                    f"🔢 Calculated Amount: {transfer.get('calculatedAmount', 'N/A')}\n"
-                    f"💵 Value (USD): {transfer.get('valueUsd', 'N/A')}\n"
-                    f"⏰ Block Time: {readable_time}\n\n"
+                    f"🔑 Signature: {transfer.get('signature', 'N/A')}\n\n"
+                    f"📤 Sender: {transfer.get('senderAddress', 'N/A')}\n\n"
+                    f"📥 Receiver: {transfer.get('receiverAddress', 'N/A')}\n\n"
+                    f"💰 Amount (raw): {transfer.get('amount', 'N/A')}\n\n"
+                    f"🔢 Calculated Amount: {transfer.get('calculatedAmount', 'N/A')}\n\n"
+                    f"💵 Value (USD): {transfer.get('valueUsd', 'N/A')}\n\n"
+                    f"⏰ Block Time: UTC {readable_time}\n\n\n\n"
                 )
         else:
             message = "No whale transfers found exceeding the threshold."
@@ -152,6 +156,8 @@ async def top_token_holders(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"💰 Balance: {holder.get('balance', 'N/A')}\n"
                 f"💵 USD Value: ${float(holder.get('valueUsd', 0)):.2f}\n"
                 f"📈 % Supply Held: {holder.get('percentageOfSupplyHeld', 0):.4f}%\n\n"
+                f"🔔 [see more insights](https://alpha.vybenetwork.com/)\n\n\n\n"
+
             )
 
         for chunk in utils.chunk_message(message):
@@ -185,32 +191,26 @@ async def chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"An error occurred: {e}")
     
 # NFT Collection Statistics
-async def nft_stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Fetch the NFT collection owners
-    collection_address = context.args[0] if context.args else None
-    owners_data = await utils.fetch_nft_collection_owners(collection_address)
-    
-    if owners_data is None:
-        await update.message.reply_text("😕Failed to retrieve data. Please check the collection address.")
+# NFT ANALYSIS
+async def nft_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        await update.message.reply_text("Please provide a collection address")
         return
     
-    # Analyze the data
-    owners = owners_data.get('owners', [])
-    stats = utils.analyze_nft_owners(owners)
+    collection_address = context.args[0]
+    analysis = await utils.get_nft_analysis(collection_address)
     
-    # Format the response
-    response = (
-        f"NFT Collection Statistics for {collection_address}:\n"
-        f"Total Unique Owners: {stats['total_owners']}\n"
-        f"Concentration of Holdings:\n"
+    if not analysis['text_report']:
+        await update.message.reply_text("😕Could not retrieve NFT data for this collection")
+        return
+    
+    await update.message.reply_text(
+        analysis['text_report'], 
+        parse_mode="Markdown"
     )
     
-    for owner, count in stats['concentration'].items():
-        response += f"- {owner}: {count} NFTs\n"
-    
-    await update.message.reply_text(response)
-
-# REALTIME / WEBSOCKET 
+    if analysis['chart_image']:
+        await update.message.reply_photo(photo=analysis['chart_image'])
 
 
 if __name__ == "__main__":
@@ -224,7 +224,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("tokenDetails", token_details))
     app.add_handler(CommandHandler("topholders", top_token_holders))
     app.add_handler(CommandHandler("chart", chart))
-    app.add_handler(CommandHandler("nft_stats", nft_stats))
+    app.add_handler(CommandHandler("nft_analysis", nft_analysis))
 
 
     

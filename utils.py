@@ -36,13 +36,13 @@ async def get_wallet_balance(wallet_address):
         token_count = int(data.get('totalTokenCount', 0))
 
         return (
-            f"💼  **Wallet Overview**  💼\n\n"
+            f"💼  Wallet Overview  💼\n\n"
             f"🔑 Address: `{wallet_address[:6]}...{wallet_address[-4:]}`\n"
             f"🕒 Last Updated: {formatted_date}\n\n"
-            f"💰  **SOL Balance** : {sol_balance:.4f} SOL\n"
-            f"📊  **Total Tokens** : {token_count:,}\n"
-            f"💵  **Total Value** : ${float(data.get('totalTokenValueUsd', 0)):.2f}\n\n"
-            f"🔒  **Staked SOL** : {float(data.get('activeStakedSolBalance', 0)):.4f} SOL"
+            f"💰  SOL Balance : {sol_balance:.4f} SOL\n"
+            f"📊  Total Tokens : {token_count:,}\n"
+            f"💵  Total Value : ${float(data.get('totalTokenValueUsd', 0)):.2f}\n\n"
+            f"🔒  Staked SOL : {float(data.get('activeStakedSolBalance', 0)):.4f} SOL"
         )
 
     except requests.exceptions.HTTPError as e:
@@ -110,7 +110,6 @@ async def get_token_price(
     sort_by: str = None,
     page: int = 1,
     filter_zero_price: bool = True,
-    api_key: str = "blablablabla"
 ) -> str:
     """
     Asynchronously retrieves token price data from the Vybe API.
@@ -172,16 +171,26 @@ async def get_token_price(
     # Example in the async get_token_price() function when formatting each token
     message = "💎 Token Price Data:\n\n"
     for token in tokens:
+            # Convert blockTime to human-readable format
+        block_time = token.get('updateTime')
+        if block_time:
+            updatetime = datetime.fromtimestamp(block_time).strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            updatetime = 'N/A'
         message += (
             f"🏷️ Symbol: {token.get('symbol')}\n"
             f"💡 Name: {token.get('name')}\n"
             f"🏦 Mint Address: {token.get('mintAddress')}\n"
             f"💵 Price: {token.get('price')}\n"
-            f"⏳ Price 1D: {token.get('price1d')}\n"
-            f"📅 Price 7D: {token.get('price7d')}\n"
+            # f"⏳ Price 1D: {token.get('price1d')}\n"
+            # f"📅 Price 7D: {token.get('price7d')}\n"
             f"🔢 Current Supply: {token.get('currentSupply')}\n"
             f"💼 Market Cap: {token.get('marketCap')}\n"
-            f"⏰ Update Time: {token.get('updateTime')}\n"
+            f"⏰ Update Time: {updatetime}\n"
+            f"\n"
+            f"🔔 [View Tokens live](https://alpha.vybenetwork.com/tokens)\n\n\n\n"
+
+            f"\n"
             # f"🌐 Logo URL: {token.get('logoUrl')}\n\n"
         )
 
@@ -212,14 +221,16 @@ async def get_token_details(mintAddress):
         market_cap = "${:,.2f}".format(data.get('marketCap', 0)) if data.get('marketCap') else "N/A"
 
         return (
-            f"🔍 **{data.get('name', 'Unknown Token')} ({data.get('symbol', 'N/A')})**\n\n"
-            f"🆔 Mint Address: `{mintAddress[:6]}...{mintAddress[-4:]}`\n"
-            f"📅 Last Updated: {formatted_date}\n"
-            f"💰 Price: ${data.get('price', 0):.4f}\n"
-            f"📈 Market Cap: {market_cap}\n"
-            f"🔄 Current Supply: {current_supply}\n"
-            f"🔢 Decimals: {data.get('decimal', 'N/A')}\n"
-            f"✅ Verified: {'Yes' if data.get('verified') else 'No'}"
+            f"🔍 {data.get('name', 'Unknown Token')} ({data.get('symbol', 'N/A')})\n\n"
+            f"🆔 Mint Address: `{mintAddress[:6]}...{mintAddress[-4:]}`\n\n"
+            f"📅 Last Updated: {formatted_date}\n\n"
+            f"💰 Price: ${data.get('price', 0):.4f}\n\n"
+            f"📈 Market Cap: {market_cap}\n\n"
+            f"🔄 Current Supply: {current_supply}\n\n"
+            f"🔢 Decimals: {data.get('decimal', 'N/A')}\n\n"
+            f"✅ Verified: {'Yes' if data.get('verified') else 'No'}\n\n"
+            f"🔔 [View and track Tokens live](https://alpha.vybenetwork.com/tokens/{mintAddress})\n\n\n\n"
+
         )
 
     except Exception as e:
@@ -312,27 +323,92 @@ async def generate_price_chart(ohlcv_data):
     return image_stream
 
 # NFT Collection Statistics
-
-async def fetch_nft_collection_owners(collection_address):
-    url = f"https://api.vybenetwork.com/nft/collection-owners/{collection_address}"
+async def fetch_nft_collection_owners(collection_address: str) -> list:
+    """Fetch NFT collection owners from Vybe API"""
+    url = f"https://api.vybenetwork.xyz/nft/collection-owners/{collection_address}"
     headers = {
         "accept": "application/json",
         "X-API-KEY": VYBE_API_KEY
     }
+    
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as response:
             if response.status == 200:
-                return await response.json()
-            else:
-                return None
-            
-async def analyze_nft_owners(owners):
-    unique_owners = set(owners)
-    total_owners = len(unique_owners)
-    concentration = {owner: owners.count(owner) for owner in unique_owners}
+                data = await response.json()
+                return data.get('data', [])
+            return []
+def analyze_nft_owners(owners: list) -> dict:
+    """Analyze NFT ownership distribution"""
+    if not owners:
+        return {}
+    
+    # Calculate ownership concentration
+    ownership_count = {}
+    for owner in owners:
+        address = owner.get('address', 'unknown')
+        ownership_count[address] = ownership_count.get(address, 0) + 1
+    
+    sorted_owners = sorted(ownership_count.items(), 
+                         key=lambda x: x[1], 
+                         reverse=True)
     
     return {
-        "total_owners": total_owners,
-        "concentration": concentration
+        "total_owners": len(ownership_count),
+        "top_holder": sorted_owners[0] if sorted_owners else None,
+        "average_per_holder": len(owners) / len(ownership_count) if ownership_count else 0,
+        "concentration": dict(sorted_owners[:5])  # Top 5 holders
     }
 
+async def get_nft_analysis(collection_address: str) -> dict:
+    """Get NFT collection analysis using available data"""
+    owners = await fetch_nft_collection_owners(collection_address)
+    analysis = analyze_nft_owners(owners)
+    
+    return {
+        'text_report': format_nft_report(collection_address, analysis),
+        'chart_image': generate_ownership_chart(analysis)
+    }
+
+def format_nft_report(collection_address: str, analysis: dict) -> str:
+    """Format NFT analysis report"""
+    if not analysis:
+        return "No ownership data available for this collection"
+    
+    concentration = "\n".join(
+        [f"- {addr[:6]}...{addr[-4]}: {count} NFTs" 
+         for addr, count in analysis.get('concentration', {}).items()]
+    )
+    # 📦 Total NFTs Tracked: {len(owners)}
+    return f"""
+🖼 *NFT Collection Analysis* 🖼
+
+🔗 Collection Address: `{collection_address}`
+👥 Unique Owners: {analysis.get('total_owners', 0)}
+🏆 *Ownership Concentration*
+{concentration}
+
+📊 Average NFTs per Holder: {analysis.get('average_per_holder', 0):.1f}
+🐳 Top Holder: {analysis.get('top_holder', ('', 0))[1]} NFTs
+"""
+
+def generate_ownership_chart(analysis: dict) -> BytesIO:
+    """Generate ownership distribution chart"""
+    if not analysis.get('concentration'):
+        return None
+    
+    labels = [f"{addr[:3]}..{addr[-3]}" 
+             for addr in analysis['concentration'].keys()]
+    values = list(analysis['concentration'].values())
+    
+    plt.figure(figsize=(10, 5))
+    plt.bar(labels, values, color='purple')
+    plt.title("Top Holder NFT Distribution")
+    plt.xlabel("Wallet Address")
+    plt.ylabel("Number of NFTs")
+    plt.xticks(rotation=45)
+    
+    buf = BytesIO()
+    plt.savefig(buf, format='png', bbox_inches='tight')
+    plt.close()
+    buf.seek(0)
+    return buf
