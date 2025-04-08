@@ -65,7 +65,7 @@ python bot.py
 
 | Whale Alerts | Top Holders |
 |--------------|-------------|
-| ![Whale](imagesforreadme\whales.png) | ![TopHolders](imagesforreadme\topholders.png) |
+| ![Whale](imagesforreadme/whales.png) | ![TopHolders](imagesforreadme/topholders.png) |
 
 ## 💡 Innovation Highlights
 
