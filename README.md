@@ -65,9 +65,12 @@ python bot.py
 
 ## 📷 Screenshots
 
-| Whale Alerts | Top Holders | chart | Top Holders |
-|--------------|-------------|-------------|
-| ![Whale](imagesforreadme/whales.png) | ![TopHolders](imagesforreadme/topholders.png) |![Chart](imagesforreadme/chart.png)|
+| Whale Alerts | Top Holders |
+|--------------|-------------|
+| ![Whale](imagesforreadme/whales.png) | ![TopHolders](imagesforreadme/topholders.png) |
+| chart | Token Details |
+|--------------|-------------|
+| ![Chart](imagesforreadme/chart.png) | [Token Deets](imagesforreadme/tokdeets.png) |
 
 ## 💡 Innovation Highlights
 

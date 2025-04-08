@@ -34,7 +34,7 @@ async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     token_mint = context.args[0]
     token_info = await utils.get_token_details(token_mint)
-    await update.message.reply_text(token_info)
+    await update.message.reply_text(f"[see more insights](https://alpha.vybenetwork.com/tokens/{token_mint}/)\n{token_info}")
 async def get_balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     wallet_address = context.args[0] if context.args else None
     if not wallet_address:
@@ -146,7 +146,11 @@ async def top_token_holders(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # message = f"👑 *Top {count} Holders of Token:* `{mint_address}`\n\n"
         token_symbol = holders[0].get("tokenSymbol", "N/A")
-        message = f"👑 *Top {count} Holders of Token:* `{mint_address}` — *{token_symbol}*\n\n"
+        message = (
+            f"👑 *Top {count} Holders of Token:* `{mint_address}` — *{token_symbol}*\n"
+            f"🔔 [see more insights on Alphavybe](https://alpha.vybenetwork.com/)\n\n"
+        )
+
 
         for holder in holders:
             message += (
@@ -156,7 +160,7 @@ async def top_token_holders(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"💰 Balance: {holder.get('balance', 'N/A')}\n"
                 f"💵 USD Value: ${float(holder.get('valueUsd', 0)):.2f}\n"
                 f"📈 % Supply Held: {holder.get('percentageOfSupplyHeld', 0):.4f}%\n\n"
-                f"🔔 [see more insights](https://alpha.vybenetwork.com/)\n\n\n\n"
+                # f"🔔 [see more insights](https://alpha.vybenetwork.com/)\n\n\n\n"
 
             )
 
@@ -187,6 +191,8 @@ async def chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         token_name = await utils.get_token_name_for_chart(mint_address)
         await update.message.reply_text(f"{token_name}📈 Price Chart:")
         await update.message.reply_photo(photo=chart_image)
+        # [see more insights](https://alpha.vybenetwork.com/)
+        await update.message.reply_text(f"🔔 [see more insights](https://alpha.vybenetwork.com/tokens/{mint_address})\n")
     except aiohttp.ClientResponseError as e:
         await update.message.reply_text(f"Failed to fetch data: {e}")
     except Exception as e:
