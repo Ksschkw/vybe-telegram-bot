@@ -69,7 +69,6 @@ python bot.py
 |--------------|-------------|
 | ![Whale](imagesforreadme/whales.png) | ![TopHolders](imagesforreadme/topholders.png) |
 | chart | Token Details |
-|--------------|-------------|
 | ![Chart](imagesforreadme/chart.png) | [Token Deets](imagesforreadme/tokdeets.png) |
 
 ## 💡 Innovation Highlights
