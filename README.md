@@ -2,6 +2,7 @@
 # 🚀 Vybe Analytics Telegram Bot
 
 Vybe Analytics Telegram Bot is a powerful Telegram bot that provides real-time, on-chain insights using Vybe Network APIs. From tracking wallet balances to showing the top token holders and whale alerts, this bot delivers instant analytics to any Telegram user.
+- 🤖 **Try The Bot**: [VybeVigil](https://t.me/VybeVigil_bot)
 
 ## 📝 Project Summary
 Vybe Analytics Bot is a Telegram bot that delivers real-time on-chain insights via Vybe APIs. Designed for crypto enthusiasts and traders, it features wallet balance tracking, whale alerts, token price charts, NFT analysis, and deep links to AlphaVybe for advanced analytics. Built with Python and `python-telegram-bot`, it combines multiple Vybe API endpoints into a seamless UX. Key innovations include dynamic parameter handling for commands (e.g., adjustable whale alert thresholds) and direct integration of price charts/NFT ownership visualizations. The bot is commercially deployable today and targets users needing instant, actionable crypto data.
@@ -25,7 +26,6 @@ Vybe Analytics Bot is a Telegram bot that delivers real-time on-chain insights v
 - 🐳 **Whale Alerts**: View the latest large token transfers.
 - 📊 **Token Details**: Retrieve full details about any token by its mint address.
 - 👑 **Top Token Holders**: View the richest wallets holding a particular token.
-- 🤖 **Try The Bot**: [VybeVigil](https://t.me/VybeVigil_bot)
 - 🖼 **nft_analysis** - Get NFT collection statistics
 <!-- - 🖼️ Token logos and owner logos included for visual context. -->
    ### 🤖 Smart Command Correction
