@@ -87,7 +87,7 @@ python bot.py
 ## 📷 Screenshots
 
 | START |
-|----------------------------|
+|-------|
 | ![Start](imagesforreadme/start.png) |
 
 | Whale Alerts | Top Holders |
