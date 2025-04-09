@@ -12,10 +12,10 @@ Vybe Analytics Bot is a Telegram bot that delivers real-time on-chain insights v
 | `/balance`        | `/account/token-balance/{address}`    | Wallet balances and SOL staking data      |
 | `/chart`          | `/price/{mint}/token-ohlcv`           | OHLCV data for price charts               |
 | `/whalealert`     | `/token/transfers`                    | Whale transfers filtered by USD threshold |
-| `/prices`         | `/tokens`                             | OHLCV data for price charts               |
-| `/tokendetails`   | `/token/{mintAddress}`                | OHLCV data for price charts               |
-| `/topholders`     | `/{mint_address}/top-holders`         | OHLCV data for price charts               |
-| `/nft_analysis`   | `/nft/collection-owners/{address}`    | NFT ownership distribution analysis       |
+| `/prices`         | `/tokens`                             | Retrieves a list of tracked tokens.       |
+| `/tokendetails`   | `/token/{mintAddress}`                | Retrieves details of the specified token. |
+| `/topholders`     | `/{mint_address}/top-holders`         | Retrieves the top 1,000 token holders.    |
+| `/nft_analysis`   | `/nft/collection-owners/{address}`    | Get the addresses of wallets that own NFT in specified collection.|
 
 ## 📌 Features
 
