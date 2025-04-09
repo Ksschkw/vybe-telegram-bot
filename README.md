@@ -16,6 +16,7 @@ Vybe Analytics Bot is a Telegram bot that delivers real-time on-chain insights v
 | `/tokendetails`   | `/token/{mintAddress}`                | OHLCV data for price charts               |
 | `/topholders`     | `/{mint_address}/top-holders`         | OHLCV data for price charts               |
 | `/nft_analysis`   | `/nft/collection-owners/{address}`    | NFT ownership distribution analysis       |
+
 ## 📌 Features
 
 - 💼 **Wallet Balance**: Check the balance of any Solana wallet.
@@ -27,6 +28,29 @@ Vybe Analytics Bot is a Telegram bot that delivers real-time on-chain insights v
 - 🤖 **Try The Bot**: [VybeVigil](https://t.me/VybeVigil_bot)
 - 🖼 **nft_analysis** - Get NFT collection statistics
 <!-- - 🖼️ Token logos and owner logos included for visual context. -->
+   ### 🤖 Smart Command Correction
+   We all make typos! The bot automatically suggests corrections for common mistakes:
+   - `price` → `/prices`
+   - `bal` → `/balance`
+   - `walealert` → `/whalealert`
+   - `nft` → `/nft_analysis`
+   - And [50+ other variants](https://github.com/your-repo/blob/main/bot.py#L123-L150)
+
+   **Example Interaction:**  
+      ```
+      User:  pric solana
+      Bot:   ❓ Did you mean /prices?
+            Try: `/prices <token_mint> [count]`
+            
+      User:  whal
+      Bot:   ❓ Did you mean /whalealert?
+            Try: `/whalealert [threshold] [limit]`
+      ```
+
+   ### Why This Matters
+   - 🛡️ **Prevents Frustration**: No more silent failures for typos
+   - 🧠 **Context-Aware**: Understands 50+ common misspellings
+   - 🚀 **Instant Help**: Suggests correct syntax immediately
 
 ## 🛠️ Installation
 

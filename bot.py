@@ -1,18 +1,100 @@
 from telegram import Update, WebAppInfo
-from telegram.ext import Application, CommandHandler, ContextTypes
+from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 import utils
 import os
 from dotenv import load_dotenv
 from datetime import datetime
 import time
 import aiohttp
-
-
+from difflib import get_close_matches
 
 load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 VYBE_API_KEY = os.getenv("VYBE_API_KEY")
 
+# Command suggestions config (add after imports)
+COMMAND_SUGGESTIONS = {
+    # /prices variants
+    'price': '/prices',
+    'prices': '/prices',
+    'prize': '/prices',
+    'pice': '/prices',
+    'prc': '/prices',
+    'tokenprice': '/prices',
+    
+    # /balance variants
+    'balance': '/balance',
+    'bal': '/balance',
+    'blance': '/balance',
+    'wallet': '/balance',
+    'wallets': '/balance',
+    'balanse': '/balance',
+    
+    # /whalealert variants
+    'whale': '/whalealert',
+    'whales': '/whalealert',
+    'wale': '/whalealert',
+    'whalealrt': '/whalealert',
+    'bigtransfers': '/whalealert',
+    'bigtx': '/whalealert',
+    
+    # /chart variants
+    'chart': '/chart',
+    'charts': '/chart',
+    'chrt': '/chart',
+    'pricechart': '/chart',
+    'graph': '/chart',
+    
+    # /tokendetails variants
+    'details': '/tokendetails',
+    'tokeninfo': '/tokendetails',
+    'tokendetail': '/tokendetails',
+    'metadat': '/tokendetails',
+    'tokenstats': '/tokendetails',
+    
+    # /topholders variants
+    'holders': '/topholders',
+    'richlist': '/topholders',
+    'topwallets': '/topholders',
+    'bigbags': '/topholders',
+    'whalewallets': '/topholders',
+    
+    # /nft_analysis variants
+    'nft': '/nft_analysis',
+    'nfts': '/nft_analysis',
+    'nftstats': '/nft_analysis',
+    'nftanalysis': '/nft_analysis',
+    'collection': '/nft_analysis',
+    
+    # General
+    'start': '/start',
+    'help': '/start',
+    'commands': '/start'
+}
+
+async def handle_typos(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_text = update.message.text.lower().strip()
+    
+    # Remove "/" if user tried but mistyped
+    if user_text.startswith('/'):
+        user_text = user_text[1:]
+    
+    # Find closest matching command
+    matches = get_close_matches(user_text, COMMAND_SUGGESTIONS.keys(), n=1, cutoff=0.7)
+    
+    if matches:
+        suggested_cmd = COMMAND_SUGGESTIONS[matches[0]]
+        await update.message.reply_text(
+            f"Unrecognized command. Say what?\n❓ Did you mean {suggested_cmd}?\n"
+            f"Try: `{suggested_cmd} <parameters>`\n\n"
+            "📋 List all commands with /start",
+            parse_mode="Markdown"
+        )
+    else:
+        await update.message.reply_text(
+            "🤖 I don't recognize that command. "
+            "Type /start to see available commands."
+        )
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🚀 Vybe Analytics Bot Activated!\n\n"
@@ -245,8 +327,8 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("topholders", top_token_holders))
     app.add_handler(CommandHandler("chart", chart))
     app.add_handler(CommandHandler("nft_analysis", nft_analysis))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_typos))
 
 
-    
     # Start polling
     app.run_polling()
