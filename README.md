@@ -89,6 +89,7 @@ python bot.py
 | START |
 |----------------------------|
 | ![Start](imagesforreadme/start.png) |
+
 | Whale Alerts | Top Holders |
 |--------------|-------------|
 | ![Whale](imagesforreadme/whale.png) | ![TopHolders](imagesforreadme/topholders.png) |
