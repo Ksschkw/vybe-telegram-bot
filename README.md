@@ -58,18 +58,22 @@ python bot.py
 
 ## 🧠 How It Works
 
-- Uses Vybe API endpoints like `/balance`, `/price`, `/token-details`, `/top-holders`, and `/whale-alert`.
+- Uses Vybe API endpoints like `/balance`, `/price`, `/chart`, `/token-details`, `/top-holders`, and `/whale-alert`.
 - Formats block time into human-readable format using Python's datetime.
 - Uses `python-telegram-bot` for asynchronous, user-friendly bot behavior.
 <!-- - Token logos and owner logos are embedded via direct URL (Telegram supports image previews). -->
 
 ## 📷 Screenshots
 
+| START |
+|----------------------------|
+| ![Start](imagesforreadme/start.png) |
 | Whale Alerts | Top Holders |
 |--------------|-------------|
 | ![Whale](imagesforreadme/whale.png) | ![TopHolders](imagesforreadme/topholders.png) |
 | chart | Token Details |
 | ![Chart](imagesforreadme/chart.png) | ![Token Deets](imagesforreadme/tokdeets.png) |
+
 
 ## 💡 Innovation Highlights
 

@@ -1,4 +1,4 @@
-from telegram import Update
+from telegram import Update, WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes
 import utils
 import os
@@ -18,13 +18,24 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🚀 Vybe Analytics Bot Activated!\n\n"
                                "📋 Available commands:\n"
                                "🔍 /balance <wallet> - Check wallet balance\n"
+                               "📊 /chart <mint_address> - get the price chart.\n"
                                "📊 /prices <token_mint(optional)> [token count(optional)]- Get token prices\n"
                                "🐋 /whalealert <threshold(optional)> [alert count(optional)] - Latest large transactions\n"
                                "🔎 /tokendetails <mintAdress> - Get token details\n"
                                "👑 /topholders <mintAdress> [count(optional)] - View top holders of a token\n"
-                               "📊 /chart <mint_address> - get the price chart.\n"
-                               "🖼 /nft_analysis <collection_address> - Get NFT collection statistics\n"
-                               )
+                               "🖼 /nft_analysis <collection_address> - Get NFT collection statistics\n",
+                               reply_markup={
+                                   "inline_keyboard":[
+                                       [
+                                           {
+                                              "text": "See more insights",
+                                              "web_app": {"url": "https://alpha.vybenetwork.com/"}
+ 
+                                           }
+                                       ]
+                                   ]
+                               }
+                            )
     
 async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /tokendetails command"""
@@ -34,7 +45,8 @@ async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     token_mint = context.args[0]
     token_info = await utils.get_token_details(token_mint)
-    await update.message.reply_text(f"[see more insights](https://alpha.vybenetwork.com/tokens/{token_mint}/)\n{token_info}")
+    await update.message.reply_text(token_info)
+
 async def get_balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
     wallet_address = context.args[0] if context.args else None
     if not wallet_address:
