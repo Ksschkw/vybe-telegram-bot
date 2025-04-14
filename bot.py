@@ -1,5 +1,5 @@
-from telegram import Update, WebAppInfo
-from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup ,WebAppInfo
+from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
 import utils
 import os
 from dotenv import load_dotenv
@@ -65,6 +65,15 @@ COMMAND_SUGGESTIONS = {
     'nftstats': '/nft_analysis',
     'nftanalysis': '/nft_analysis',
     'collection': '/nft_analysis',
+    'collections': '/nft_analysis',
+    'nftdetails': '/nft_analysis',
+
+    # tutorial variants
+    'tutorial': '/tutorial',
+    'tutorials': '/tutorial',
+    'guide': '/tutorial',
+    'learn': '/tutorial',
+    'helpme': '/tutorial',
     
     # General
     'start': '/start',
@@ -96,9 +105,95 @@ async def handle_typos(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Type /start to see available commands."
         )
 
+
+async def tutorial_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Starts the interactive tutorial with Vybevigil's analytic edge
+    """
+    context.user_data["tutorial_step"] = 1
+    text = (
+        "🔮 **Vybe Analytics Tutorial** 🔮\n\n"
+        "Step 1: **Core Commands**\n"
+        "• `/prices` - Track token values\n"
+        "• `/balance <wallet>` - Check SOL holdings\n"
+        "• `/whalealert` - Spot big moves\n\n"
+        "Hit **Next** to dive deeper into analytics"
+    )
+    keyboard = [[InlineKeyboardButton("Next ➡️", callback_data="tutorial_next")]]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text(text, reply_markup=reply_markup, parse_mode="Markdown")
+
+async def tutorial_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Handles tutorial navigation with chain analysis flair
+    """
+    query = update.callback_query
+    await query.answer()
+
+    step = context.user_data.get("tutorial_step", 1)
+    
+    # Navigation logic
+    if query.data == "tutorial_next":
+        step += 1
+    elif query.data == "tutorial_back":
+        step = max(1, step - 1)
+    elif query.data == "tutorial_restart":
+        step = 1
+        
+    context.user_data["tutorial_step"] = step
+
+    # Step content
+    if step == 1:
+        text = (
+            "🔮 **Step 1: Core Commands** 🔮\n\n"
+            "• `/prices` - Track token values\n"
+            "• `/balance <wallet>` - Check SOL holdings\n"
+            "• `/whalealert` - Spot big moves\n\n"
+            "Pro Tip: Add number parameters like `/whalealert 5000 5`"
+        )
+    elif step == 2:
+        text = (
+            "📊 **Step 2: Deep Analysis** 📊\n\n"
+            "• `/tokendetails <MINT>` - Full token metrics\n"
+            "• `/topholders <MINT>` - Whale wallets\n"
+            "• `/chart <MINT>` - Price history\n\n"
+            "Try: `/tokendetails EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`"
+        )
+    elif step == 3:
+        text = (
+            "🛠️ **Step 3: Advanced Tools** 🛠️\n\n"
+            "• `/nft_analysis` - Collection stats\n"
+            "• Web Dashboard - Full analytics\n"
+            "• Custom alerts - Coming soon!\n\n"
+            "Pro Tip: Use our web interface for deep dives!"
+        )
+    else:
+        text = (
+            "🎉 **Tutorial Complete!** 🎉\n\n"
+            "You're now ready to:\n"
+            "• Track whale movements 🐋\n"
+            "• Analyze token distributions 📊\n"
+            "• Monitor NFT collections 🖼️\n\n"
+            "Type /tutorial again for a refresher!"
+        )
+        keyboard = [[InlineKeyboardButton("🔄 Restart", callback_data="tutorial_restart")]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode="Markdown")
+        return
+
+    # Dynamic buttons
+    buttons = []
+    if step > 1:
+        buttons.append(InlineKeyboardButton("⬅️ Back", callback_data="tutorial_back"))
+    if step < 3:
+        buttons.append(InlineKeyboardButton("Next ➡️", callback_data="tutorial_next"))
+    
+    reply_markup = InlineKeyboardMarkup([buttons])
+    await query.edit_message_text(text=text, reply_markup=reply_markup, parse_mode="Markdown")
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("🚀 Vybe Analytics Bot Activated!\n\n"
                                "📋 Available commands:\n"
+                               "🎮 /tutorial - Interactive beginner's guide\n"
                                "🔍 /balance <wallet> - Check wallet balance\n"
                                "📊 /chart <mint_address> - get the price chart.\n"
                                "📊 /prices <token_mint(optional)> [token count(optional)]- Get token prices\n"
@@ -286,7 +381,7 @@ async def chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"{token_name}📈 Price Chart:")
         await update.message.reply_photo(photo=chart_image)
         # [see more insights](https://alpha.vybenetwork.com/)
-        await update.message.reply_text(f"🔔 [see more insights](https://alpha.vybenetwork.com/tokens/{mint_address})\n")
+        await update.message.reply_text(f"🔔 See more insights: https://alpha.vybenetwork.com/tokens/{mint_address})\n")
     except aiohttp.ClientResponseError as e:
         await update.message.reply_text(f"Failed to fetch data: {e}")
     except Exception as e:
@@ -328,6 +423,8 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("chart", chart))
     app.add_handler(CommandHandler("nft_analysis", nft_analysis))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_typos))
+    app.add_handler(CommandHandler("tutorial", tutorial_start))
+    app.add_handler(CallbackQueryHandler(tutorial_callback, pattern="^tutorial_"))
 
 
     # Start polling

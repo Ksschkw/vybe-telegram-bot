@@ -7,6 +7,7 @@ import aiohttp
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from io import BytesIO
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 # Load environment variables
 load_dotenv()
@@ -229,7 +230,7 @@ async def get_token_details(mintAddress):
             f"🔄 Current Supply: {current_supply}\n\n"
             f"🔢 Decimals: {data.get('decimal', 'N/A')}\n\n"
             f"✅ Verified: {'Yes' if data.get('verified') else 'No'}\n\n"
-            f"🔔 [View and track Tokens live](https://alpha.vybenetwork.com/tokens/{mintAddress})\n\n\n\n"
+            f"🔔 Track Live: https://alpha.vybenetwork.com/tokens/{mintAddress}\n\n\n\n"
 
         )
 

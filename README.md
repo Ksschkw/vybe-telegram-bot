@@ -57,7 +57,7 @@ Vybe Analytics Bot is a Telegram bot that delivers real-time on-chain insights v
 1. Clone the repo:
 
 ```bash
-git clone https://github.com/your-username/vybe-telegram-bot.git
+git clone https://github.com/Ksschkw/vybe-telegram-bot.git
 cd vybe-telegram-bot
 ```
 
@@ -119,6 +119,8 @@ python bot.py
 | ![Whale](imagesforreadme/whale.png) | ![TopHolders](imagesforreadme/topholders.png) |
 | chart | Token Details |
 | ![Chart](imagesforreadme/chart.png) | ![Token Deets](imagesforreadme/tokdeets.png) |
+| Tutorial | Tutorial |
+| ![Example1](imagesforreadme/tutorial1.png) | ![Exaample2](imagesforreadme/tutorial2.png) |
 
 
 ## 💡 Innovation Highlights
