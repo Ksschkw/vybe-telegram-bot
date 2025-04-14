@@ -1,0 +1,10 @@
+python-telegram-bot
+requests
+python-dotenv
+apscheduler
+aiohttp
+datetime
+aiohttp
+matplotlib
+pytz
+time

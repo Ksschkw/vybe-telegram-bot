@@ -1,10 +1,5 @@
-python-telegram-bot
-requests
-python-dotenv
-apscheduler
-aiohttp
-datetime
-aiohttp
-matplotlib
-pytz
-time
+aiohttp==3.11.16
+matplotlib==3.10.1
+python-dotenv==1.1.0
+python-telegram-bot==22.0
+Requests==2.32.3
