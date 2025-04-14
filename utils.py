@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 from datetime import datetime, UTC
 import requests
 import os
