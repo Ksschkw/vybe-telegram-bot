@@ -34,7 +34,7 @@ Vybe Analytics Bot is a Telegram bot that delivers real-time on-chain insights v
    - `bal` → `/balance`
    - `walealert` → `/whalealert`
    - `nft` → `/nft_analysis`
-   - And [50+ other variants](https://github.com/Ksschkw/vybe-telegram-bot/bot.py#L16-L82)
+   - And [50+ other variants](https://github.com/Ksschkw/vybe-telegram-bot/blob/main/bot.py)
 
    **Example Interaction:**  
       ```
