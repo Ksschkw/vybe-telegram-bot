@@ -34,7 +34,7 @@ Vybe Analytics Bot is a Telegram bot that delivers real-time on-chain insights v
    - `bal` → `/balance`
    - `walealert` → `/whalealert`
    - `nft` → `/nft_analysis`
-   - And [50+ other variants](https://github.com/your-repo/blob/main/bot.py#L123-L150)
+   - And [50+ other variants](https://github.com/Ksschkw/vybe-telegram-bot/bot.py#L16-L82)
 
    **Example Interaction:**  
       ```
@@ -95,6 +95,7 @@ python bot.py
 | `/topholders`         | `<mint_address> [count]`                | Show top holders of a token (default: top 10)                              | `/topholders EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v 5`           |
 | 📊 `/chart`           | `<mint_address>`                        | Display price chart for a token (last 30 days)                             | `/chart EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`                  |
 | 🖼 `/nft_analysis`    | `<collection_address>`                  | Analyze NFT collection ownership distribution                              | `/nft_analysis 7VQo9H...`                                              |
+| `/tutorial`           | `<nothing>`            | Shows a guided tutorial on how to use the bot |
 
 **Syntax Guide**:  
 - `<required>`: Replace with actual value (e.g., `<wallet_address>`).  
