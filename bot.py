@@ -410,6 +410,11 @@ async def nft_analysis(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_photo(photo=analysis['chart_image'])
 
 
+import threading
+from dummy_server import run_dummy_server
+
+# Start the dummy server in a new thread
+threading.Thread(target=run_dummy_server, daemon=True).start()
 if __name__ == "__main__":
     app = Application.builder().token(TELEGRAM_TOKEN).build()
     
