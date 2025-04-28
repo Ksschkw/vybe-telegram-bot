@@ -7,7 +7,6 @@ from datetime import datetime
 import time
 import aiohttp
 from difflib import get_close_matches
-import asyncio
 
 load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -416,7 +415,8 @@ from dummy_server import run_dummy_server
 
 # Start the dummy server in a new thread
 threading.Thread(target=run_dummy_server, daemon=True).start()
-async def main():
+    
+if __name__ == "__main__":
     app = Application.builder().token(TELEGRAM_TOKEN).build()
     
     # Command handlers
@@ -434,7 +434,5 @@ async def main():
 
 
     # Start polling
-    await app.run_polling() 
-    await app.idle()
-if __name__ == "__main__":
-    asyncio.run(main())
+    app.run_polling() 
+    
