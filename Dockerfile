@@ -3,9 +3,11 @@ FROM python:3.11-slim
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1
 
-# Install system dependencies for matplotlib and general requirements
+# Install system dependencies including Xvfb
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
+    xvfb \
+    xauth \
     ca-certificates \
     fonts-liberation \
     libasound2 \
