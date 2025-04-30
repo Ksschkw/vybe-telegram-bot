@@ -10,7 +10,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("Chart",       callback_data="menu_chart"),
          InlineKeyboardButton("Holders",     callback_data="menu_holders")],
         [InlineKeyboardButton("NFT Analytics",callback_data="menu_nft"),
-         InlineKeyboardButton("Pyth OHLC",   callback_data="menu_pyth")],
+         InlineKeyboardButton("Pyth",   callback_data="menu_pyth")],
         [InlineKeyboardButton("Tutorial",    callback_data="menu_tutorial")],
         [InlineKeyboardButton("Whale Alert",    callback_data="whale")]
     ]
