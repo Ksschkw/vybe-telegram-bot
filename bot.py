@@ -33,6 +33,8 @@ app = Application.builder().token(TELEGRAM_TOKEN).build()
 # 1. Command Handlers (Slash Commands)
 app.add_handlers([
     CommandHandler("start", start_h.start),
+    CommandHandler("help", start_h.start),
+    CommandHandler("commands", start_h.show_commands),
     CommandHandler("balance", get_balance),
     CommandHandler("whalealert", whale_alert),
     CommandHandler("prices", check_prices),

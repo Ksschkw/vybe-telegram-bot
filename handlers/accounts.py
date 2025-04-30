@@ -84,9 +84,9 @@ async def start_accounts(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("Known Accounts", callback_data="acct_known")],
         [InlineKeyboardButton("Wallet Balance", callback_data="acct_balance")],
         [InlineKeyboardButton("Balance History", callback_data="acct_balance_ts")],
-        [InlineKeyboardButton("🔙 Main Menu", callback_data="menu_accounts")]
+        [InlineKeyboardButton("🔙 Main Menu", callback_data="main_menu")]
     ]
-    await update.callback_query.message.edit_text(
+    await update.callback_query.message.reply_text(
         "💼 *Accounts Menu*\nChoose an option:",
         reply_markup=InlineKeyboardMarkup(kb),
         parse_mode="Markdown"
@@ -193,7 +193,7 @@ async def handle_accounts_input(update: Update, context: ContextTypes.DEFAULT_TY
             "What would you like to do next?",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("🔙 Accounts Menu", callback_data="menu_accounts")],
-                [InlineKeyboardButton("🏠 Main Menu", callback_data="menu_start")]
+                [InlineKeyboardButton("🏠 Main Menu", callback_data="main_menu")]
             ])
         )
 
@@ -207,7 +207,7 @@ async def cancel_operation(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "❌ Operation cancelled",
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("🔙 Accounts Menu", callback_data="menu_accounts")],
-            [InlineKeyboardButton("🏠 Main Menu", callback_data="menu_start")]
+            [InlineKeyboardButton("🏠 Main Menu", callback_data="main_menu")]
         ])
     )
 

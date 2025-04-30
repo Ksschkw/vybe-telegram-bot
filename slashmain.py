@@ -104,7 +104,16 @@ COMMAND_SUGGESTIONS = {
 }
 
 async def handle_typos(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Improved typo handler with contextual awareness"""
+    """Smart typo handler with flow awareness"""
+    uid = update.effective_user.id
+    
+    # Ignore messages during active flows
+    if uid in USER_STATE:
+        return
+    
+    # Ignore messages with buttons
+    if update.message.reply_markup:
+        return
     user_text = update.message.text.lower().strip()
     
     # Check if we're in a flow state
@@ -141,8 +150,8 @@ async def handle_typos(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(
             "🤖 I don't recognize that command. Try these:\n"
             "• /start - Show main menu\n"
-            "• /help - List all commands\n"
-            "• /tutorial - Beginner's guide",
+            "• /tutorial - Beginner's guide\n"
+            "• Type /commands for full list",
             parse_mode="Markdown"
         )
 

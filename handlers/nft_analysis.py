@@ -59,7 +59,7 @@ async def start_nft(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.answer()
     USER_STATE[update.effective_user.id] = {"flow": "nft", "step": "input"}
     
-    await update.callback_query.message.edit_text(
+    await update.callback_query.message.reply_text(
         "🖼 *NFT Collection Analysis*\nSend collection address:",
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(CANCEL_BUTTON)
@@ -138,7 +138,7 @@ async def show_followup_menu(update: Update):
         "What would you like to do next?",
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("🖼 New Analysis", callback_data="menu_nft"),
-             InlineKeyboardButton("🏠 Main Menu", callback_data="menu_start")]
+             InlineKeyboardButton("🏠 Main Menu", callback_data="main_menu")]
         ])
     )
 
@@ -153,7 +153,7 @@ async def cancel_operation(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "❌ NFT analysis cancelled",
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("🖼 Try Again", callback_data="menu_nft"),
-             InlineKeyboardButton("🏠 Main Menu", callback_data="menu_start")]
+             InlineKeyboardButton("🏠 Main Menu", callback_data="main_menu")]
         ])
     )
 

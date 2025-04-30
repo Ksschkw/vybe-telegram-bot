@@ -66,7 +66,7 @@ async def start_chart(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ]
     ]
     
-    await update.callback_query.message.edit_text(
+    await update.callback_query.message.reply_text(
         "📈 *Chart Settings*\nSelect timeframe:",
         reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode="Markdown"
@@ -182,7 +182,7 @@ async def send_chart(update: Update, mint: str, dates: list, closes: list):
         "What would you like to do next?",
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("🔄 New Chart", callback_data="menu_chart")],
-            [InlineKeyboardButton("🏠 Main Menu", callback_data="menu_start")]
+            [InlineKeyboardButton("🏠 Main Menu", callback_data="main_menu")]
         ])
     )
 
@@ -197,7 +197,7 @@ async def cancel_operation(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "❌ Chart operation cancelled",
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("📈 Try Again", callback_data="menu_chart")],
-            [InlineKeyboardButton("🏠 Main Menu", callback_data="menu_start")]
+            [InlineKeyboardButton("🏠 Main Menu", callback_data="main_menu")]
         ])
     )
 

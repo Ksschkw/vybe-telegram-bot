@@ -53,7 +53,7 @@ async def start_holders(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("❌ Cancel", callback_data="cancel_operation")]
     ]
     
-    await update.callback_query.message.edit_text(
+    await update.callback_query.message.reply_text(
         "👑 *Holders Analysis*\nSelect analysis type:",
         reply_markup=InlineKeyboardMarkup(keyboard),
         parse_mode="Markdown"
@@ -165,7 +165,7 @@ async def show_followup_menu(update: Update):
         "What would you like to do next?",
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("👑 New Analysis", callback_data="menu_holders")],
-            [InlineKeyboardButton("🏠 Main Menu", callback_data="menu_start")]
+            [InlineKeyboardButton("🏠 Main Menu", callback_data="main_menu")]
         ])
     )
 
@@ -180,7 +180,7 @@ async def cancel_operation(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "❌ Holders analysis cancelled",
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("👑 Try Again", callback_data="menu_holders")],
-            [InlineKeyboardButton("🏠 Main Menu", callback_data="menu_start")]
+            [InlineKeyboardButton("🏠 Main Menu", callback_data="main_menu")]
         ])
     )
 
