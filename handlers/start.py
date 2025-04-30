@@ -11,7 +11,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
          InlineKeyboardButton("Holders",     callback_data="menu_holders")],
         [InlineKeyboardButton("NFT Analytics",callback_data="menu_nft"),
          InlineKeyboardButton("Pyth OHLC",   callback_data="menu_pyth")],
-        [InlineKeyboardButton("Tutorial",    callback_data="menu_tutorial")]
+        [InlineKeyboardButton("Tutorial",    callback_data="menu_tutorial")],
+        [InlineKeyboardButton("Whale Alert",    callback_data="whale")]
     ]
     message_text = (
         "🚀 *Vybe Analytics Bot*\nChoose an option or send a slash command:\n\n"
@@ -39,6 +40,7 @@ from handlers.holders      import start_holders
 from handlers.nft_analysis import start_nft
 from handlers.pyth         import start_pyth
 from handlers.tutorial     import tutorial_start
+from slashmain        import whale_alert
 
 menu_handlers = [
     CallbackQueryHandler(start_accounts, pattern="^menu_accounts$"),
@@ -47,5 +49,7 @@ menu_handlers = [
     CallbackQueryHandler(start_holders,  pattern="^menu_holders$"),
     CallbackQueryHandler(start_nft,      pattern="^menu_nft$"),
     CallbackQueryHandler(start_pyth,     pattern="^menu_pyth$"),
-    CallbackQueryHandler(tutorial_start, pattern="^menu_tutorial$")
+    CallbackQueryHandler(tutorial_start, pattern="^menu_tutorial$"),
+    CallbackQueryHandler(whale_alert, pattern="^whale$")
+
 ]

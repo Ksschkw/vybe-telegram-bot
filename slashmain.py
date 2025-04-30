@@ -4,6 +4,7 @@ import slashutils
 import os
 from dotenv import load_dotenv
 from datetime import datetime
+import logging
 import time
 import aiohttp
 
@@ -221,23 +222,23 @@ async def whale_alert(update: Update, context: ContextTypes.DEFAULT_TYPE):
       /whalealert 500 3          -> Uses threshold 500 USD and displays up to 3 alerts.
     """
     try:
-        # Parse the threshold; default to 1000 if not provided.
-        threshold = float(context.args[0]) if len(context.args) > 0 else 1000
-        # Parse the number of alerts to display; default to 7 if not provided.
-        alert_count = int(context.args[1]) if len(context.args) > 1 else 7
-        
+        # Ensure context.args is not None before accessing elements.
+        if context.args is None:
+            threshold = 5000
+            alert_count = 5
+        else:
+            threshold = float(context.args[0]) if len(context.args) > 0 else 1000
+            alert_count = int(context.args[1]) if len(context.args) > 1 else 7
+
         # Fetch whale transfers asynchronously.
         alerts = await slashutils.detect_whale_transfers(cap=threshold)
-        
-        # Slice the list to only include the desired number of alerts (or all that are available)
         alerts = alerts[:alert_count]
+
         if alerts:
-            # numbered header and fix link closing bracket
             message = (
                 f"🔔 **Top {len(alerts)} Whale Transfers** (≥ ${threshold:.0f}):\n\n"
                 f"[Track Whales Live](https://alpha.vybenetwork.com/wallets/whales?order=totalSum&desc=true&preset=SOL+Whales)\n\n"
             )
-            # enumerate for numbering
             for i, transfer in enumerate(alerts, start=1):
                 block_time = transfer.get('blockTime')
                 if block_time:
@@ -255,13 +256,25 @@ async def whale_alert(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             message = "No whale transfers found exceeding the threshold."
 
-        
-        # If the message exceeds Telegram's character limit, split it into chunks.
+        # If this update is a callback query, answer it to remove the spinner.
+        if update.callback_query:
+            await update.callback_query.answer()
+
+        # Use effective_message to cover both message and callback query scenarios.
+        target_message = update.effective_message
+        if target_message is None:
+            logging.error("No valid message found in update!")
+            return
+
+        # Telegram has a character limit per message; send in chunks if needed.
         for chunk in slashutils.chunk_message(message):
-            await update.message.reply_text(chunk, parse_mode="Markdown")
-    
+            await target_message.reply_text(chunk, parse_mode="Markdown")
+
     except ValueError:
-        await update.message.reply_text("❌ Invalid input. Usage: /whalealert <threshold> [alert count]")
+        # On error, notify the user using the effective message.
+        target_message = update.effective_message
+        if target_message:
+            await target_message.reply_text("❌ Invalid input. Usage: /whalealert <threshold> [alert count]")
 
 async def send_chunks(update: Update, text: str, chunk_size: int = 4096):
     """Send text in Telegram message chunks if it's too long."""
