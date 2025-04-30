@@ -1,5 +1,6 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup ,WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
+from handlers.state import *
 import slashutils
 import os
 from dotenv import load_dotenv
@@ -79,31 +80,70 @@ COMMAND_SUGGESTIONS = {
     # General
     'start': '/start',
     'help': '/start',
-    'commands': '/start'
+    'commands': '/start',
+
+    'pyth': '/pyth',
+    'pythe': '/pyth',
+    'oracle': '/pyth',
+    'pricefeed': '/pyth',
+    'oracledata': '/pyth',
+    
+    # more variants for other commands
+    'nftanalysis': '/nft_analysis',
+    'nftstats': '/nft_analysis',
+    'nftholders': '/nft_analysis',
+    'collection': '/nft_analysis',
+    
+    'holders': '/topholders',
+    'richlist': '/topholders',
+    'whales': '/topholders',
+    
+    'charting': '/chart',
+    'graph': '/chart',
+    'pricechart': '/chart',
 }
 
 async def handle_typos(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Improved typo handler with contextual awareness"""
     user_text = update.message.text.lower().strip()
     
-    # Remove "/" if user tried but mistyped
-    if user_text.startswith('/'):
-        user_text = user_text[1:]
+    # Check if we're in a flow state
+    uid = update.effective_user.id
+    if uid in USER_STATE:
+        return  # Don't interfere with active flows
     
-    # Find closest matching command
-    matches = get_close_matches(user_text, COMMAND_SUGGESTIONS.keys(), n=1, cutoff=0.7)
+    # Remove accidental command slashes
+    clean_text = user_text.lstrip('/')
+    
+    # Find best matches with higher cutoff
+    matches = get_close_matches(clean_text, COMMAND_SUGGESTIONS.keys(), n=2, cutoff=0.7)
     
     if matches:
-        suggested_cmd = COMMAND_SUGGESTIONS[matches[0]]
+        suggestions = [COMMAND_SUGGESTIONS[m] for m in matches[:2]]
+        unique_suggestions = list(dict.fromkeys(suggestions))  # Preserve order
+        
+        if len(unique_suggestions) > 1:
+            suggestion_text = " or ".join(unique_suggestions)
+        else:
+            suggestion_text = unique_suggestions[0]
+        
         await update.message.reply_text(
-            f"Unrecognized command. Say what?\n❓ Did you mean {suggested_cmd}?\n"
-            f"Try: `{suggested_cmd} <parameters>`\n\n"
-            "📋 List all commands with /start",
+            f"🔍 Did you mean {suggestion_text}?\n"
+            "Try one of these commands:\n"
+            "• /prices - Token prices\n"
+            "• /balance - Wallet balances\n"
+            "• /chart - Price charts\n"
+            "• /topholders - Top token holders\n\n"
+            "📋 Full list: /start",
             parse_mode="Markdown"
         )
     else:
         await update.message.reply_text(
-            "🤖 I don't recognize that command. "
-            "Type /start to see available commands."
+            "🤖 I don't recognize that command. Try these:\n"
+            "• /start - Show main menu\n"
+            "• /help - List all commands\n"
+            "• /tutorial - Beginner's guide",
+            parse_mode="Markdown"
         )
 
 

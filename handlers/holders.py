@@ -1,149 +1,198 @@
+# handlers/holders.py
 import aiohttp
 from datetime import datetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import (
-    CallbackQueryHandler,
-    MessageHandler,
-    filters,
-    ContextTypes,
-)
+from telegram.ext import CallbackQueryHandler, MessageHandler, filters, ContextTypes
+from handlers.state import USER_STATE, CANCEL_BUTTON
 
-# per-user flow state
-USER_STATE = {}
+def chunk_message(text: str, size: int = 4096) -> list:
+    return [text[i:i+size] for i in range(0, len(text), size)]
 
-def chunk_message(text: str, size: int = 4096):
-    return [text[i : i + size] for i in range(0, len(text), size)]
-
-
-async def fetch_top_holders(mint: str, count: int):
-    """Fetch the top holders for a given token mint."""
+async def fetch_top_holders(mint: str, count: int) -> list:
+    """Fetch top holders from Vybe API"""
     url = f"https://api.vybenetwork.xyz/token/{mint}/top-holders"
     headers = {
         "accept": "application/json",
         "X-API-KEY": __import__("os").getenv("VYBE_API_KEY"),
     }
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, headers=headers) as resp:
-            resp.raise_for_status()
-            data = await resp.json()
-    return data.get("data", [])[:count]
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers) as resp:
+                resp.raise_for_status()
+                data = await resp.json()
+                return data.get("data", [])[:count]
+    except Exception as e:
+        print(f"Error fetching top holders: {e}")
+        return []
 
-
-async def fetch_holders_ts(mint: str):
-    """Fetch the holders time-series for a given token mint."""
+async def fetch_holders_ts(mint: str) -> list:
+    """Fetch holders time series data"""
     url = f"https://api.vybenetwork.xyz/token/{mint}/holders-ts"
     headers = {
         "accept": "application/json",
         "X-API-KEY": __import__("os").getenv("VYBE_API_KEY"),
     }
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, headers=headers) as resp:
-            resp.raise_for_status()
-            data = await resp.json()
-    return data.get("data", [])
-
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers) as resp:
+                resp.raise_for_status()
+                data = await resp.json()
+                return data.get("data", [])
+    except Exception as e:
+        print(f"Error fetching holders TS: {e}")
+        return []
 
 async def start_holders(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Show the Holders menu."""
+    """Initiate holders flow"""
     await update.callback_query.answer()
-    USER_STATE[update.effective_user.id] = {"flow": "holders", "step": None}
-    kb = [
-        [
-            InlineKeyboardButton("Top Holders", callback_data="holders_top"),
-            InlineKeyboardButton("Holders TS",  callback_data="holders_ts"),
-        ]
+    USER_STATE[update.effective_user.id] = {"flow": "holders", "step": "menu"}
+    
+    keyboard = [
+        [InlineKeyboardButton("Top Holders", callback_data="holders_top"),
+         InlineKeyboardButton("Holders History", callback_data="holders_ts")],
+        [InlineKeyboardButton("❌ Cancel", callback_data="cancel_operation")]
     ]
-    await update.callback_query.message.reply_text(
-        "👑 *Holders Menu*\n\nChoose an option:",
-        reply_markup=InlineKeyboardMarkup(kb),
-        parse_mode="Markdown",
+    
+    await update.callback_query.message.edit_text(
+        "👑 *Holders Analysis*\nSelect analysis type:",
+        reply_markup=InlineKeyboardMarkup(keyboard),
+        parse_mode="Markdown"
     )
 
-
 async def holders_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Record which holders option was chosen and prompt for mint and optional count."""
+    """Handle analysis type selection"""
     q = update.callback_query
     await q.answer()
     uid = q.from_user.id
-    choice = q.data.split("_")[1]  # "top" or "ts"
-    USER_STATE[uid]["step"] = choice
-
-    if choice == "top":
-        await q.message.reply_text(
-            "🔢 Send `<mint> <count>` to view top holders,\n"
-            "e.g. `Grass7B4RdKfBCjTKg… 5`"
-        )
-    else:  # holders_ts
-        await q.message.reply_text(
-            "🗓️ Send token mint to view holders time-series,\n"
-            "e.g. `Grass7B4RdKfBCjTKg…`"
-        )
-
+    analysis_type = q.data.split("_")[1]
+    
+    USER_STATE[uid] = {
+        "flow": "holders",
+        "step": "input",
+        "type": analysis_type,
+        "message_id": q.message.message_id
+    }
+    
+    if analysis_type == "top":
+        prompt = "🔢 Send `<mint_address> <count>`\nExample: `Grass... 10`"
+    else:
+        prompt = "🔎 Send token mint address:"
+    
+    await q.message.edit_text(
+        prompt,
+        parse_mode="Markdown",
+        reply_markup=InlineKeyboardMarkup(CANCEL_BUTTON)
+    )
 
 async def handle_holders_input(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle the user’s reply for the Holders menu."""
+    """Process holders input"""
     uid = update.effective_user.id
-    state = USER_STATE.get(uid)
-    if not state or state.get("flow") != "holders":
+    state = USER_STATE.get(uid, {})
+    
+    if state.get("flow") != "holders":
         return
-
-    step = state["step"]
+    
     text = update.message.text.strip()
-
-    if step == "top":
-        # Expect: "<mint> <count>"
-        parts = text.split()
-        if len(parts) != 2:
-            await update.message.reply_text("❌ Usage: `<mint> <count>`")
-        else:
-            mint, cnt_str = parts
-            try:
-                count = int(cnt_str)
-                holders = await fetch_top_holders(mint, count)
-                if not holders:
-                    await update.message.reply_text("👀 No holders data found.")
-                else:
-                    lines = [f"👑 *Top {len(holders)} Holders for* `{mint}`"]
-                    for h in holders:
-                        rank = h.get("rank")
-                        addr = h.get("ownerAddress")
-                        bal  = float(h.get("balance", 0))
-                        usd  = float(h.get("valueUsd", 0))
-                        pct  = float(h.get("percentageOfSupplyHeld", 0))
-                        lines.append(
-                            f"{rank}. `{addr}`\n"
-                            f"    • Balance: {bal:.4f}\n"
-                            f"    • Value: ${usd:,.2f}\n"
-                            f"    • Supply %: {pct:.4f}%"
-                        )
-                    for chunk in chunk_message("\n\n".join(lines)):
-                        await update.message.reply_text(chunk, parse_mode="Markdown")
-            except Exception as e:
-                await update.message.reply_text(f"❌ Error fetching top holders: {e}")
-
-    else:  # holders_ts
-        # Expect: "<mint>"
-        mint = text
-        try:
+    
+    try:
+        if state["type"] == "top":
+            parts = text.split()
+            if len(parts) != 2:
+                raise ValueError("Need mint address and count")
+                
+            mint = parts[0]
+            count = int(parts[1])
+            if count < 1 or count > 25:
+                raise ValueError("Count must be 1-25")
+            
+            holders = await fetch_top_holders(mint, count)
+            response = format_top_holders(mint, holders)
+            
+        else:  # holders_ts
+            mint = text
             series = await fetch_holders_ts(mint)
-            if not series:
-                await update.message.reply_text("📈 No holders time-series data found.")
-            else:
-                lines = [f"📈 *Holders Time-Series for* `{mint}`"]
-                for point in series:
-                    ts = point.get("holdersTimestamp")
-                    dt = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S") if ts else "N/A"
-                    n  = point.get("nHolders", 0)
-                    lines.append(f"{dt} → {n} holders")
-                for chunk in chunk_message("\n".join(lines)):
-                    await update.message.reply_text(chunk, parse_mode="Markdown")
-        except Exception as e:
-            await update.message.reply_text(f"❌ Error fetching holders time-series: {e}")
+            response = format_holders_ts(mint, series)
+            
+        for chunk in chunk_message(response):
+            await update.message.reply_text(chunk, parse_mode="Markdown")
+            
+    except ValueError as e:
+        error_msg = f"❌ Invalid input: {str(e)}\nPlease try again:"
+        await update.message.reply_text(error_msg, reply_markup=InlineKeyboardMarkup(CANCEL_BUTTON))
+    except Exception as e:
+        error_msg = f"❌ Error: {str(e)}\nPlease try again:"
+        await update.message.reply_text(error_msg, reply_markup=InlineKeyboardMarkup(CANCEL_BUTTON))
+    finally:
+        USER_STATE.pop(uid, None)
+        await show_followup_menu(update)
 
-    USER_STATE.pop(uid)
+def format_top_holders(mint: str, holders: list) -> str:
+    """Format top holders response"""
+    if not holders:
+        return "👀 No holders found for this token"
+    
+    lines = [f"👑 Top {len(holders)} Holders of `{mint[:6]}...{mint[-4:]}`"]
+    for i, holder in enumerate(holders, 1):
+        addr = holder.get("ownerAddress", "N/A")
+        balance = float(holder.get("balance", 0))
+        usd = float(holder.get("valueUsd", 0))
+        pct = float(holder.get("percentageOfSupplyHeld", 0))
+        
+        lines.append(
+            f"{i}. `{addr}`\n"
+            f"   Balance: {balance:.2f}\n"
+            f"   Value: ${usd:,.2f}\n"
+            f"   Supply %: {pct:.4f}%"
+        )
+    return "\n\n".join(lines)
 
+def format_holders_ts(mint: str, series: list) -> str:
+    """Format time series response"""
+    if not series:
+        return "📈 No historical data available"
+    
+    lines = [f"📈 Holders History for `{mint[:6]}...{mint[-4:]}`"]
+    for point in series[:15]:  # Limit to 15 points
+        ts = point.get("holdersTimestamp")
+        dt = datetime.fromtimestamp(ts).strftime("%Y-%m-%d") if ts else "N/A"
+        count = point.get("nHolders", 0)
+        lines.append(f"• {dt}: {count} holders")
+    return "\n".join(lines)
+
+async def show_followup_menu(update: Update):
+    """Show navigation options after operation"""
+    await update.message.reply_text(
+        "What would you like to do next?",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("👑 New Analysis", callback_data="menu_holders")],
+            [InlineKeyboardButton("🏠 Main Menu", callback_data="menu_start")]
+        ])
+    )
+
+async def cancel_operation(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle holders cancellation"""
+    query = update.callback_query
+    await query.answer()
+    uid = query.from_user.id
+    USER_STATE.pop(uid, None)
+    
+    await query.message.edit_text(
+        "❌ Holders analysis cancelled",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("👑 Try Again", callback_data="menu_holders")],
+            [InlineKeyboardButton("🏠 Main Menu", callback_data="menu_start")]
+        ])
+    )
 
 handlers = [
+    CallbackQueryHandler(start_holders, pattern="^menu_holders$"),
     CallbackQueryHandler(holders_callback, pattern="^holders_"),
-    MessageHandler(filters.TEXT & ~filters.COMMAND, handle_holders_input),
+    CallbackQueryHandler(cancel_operation, pattern="^cancel_operation$"),
+    MessageHandler(
+        filters.TEXT & ~filters.COMMAND & (
+            filters.Regex(r'^[1-9A-HJ-NP-Za-km-z]{32,44}\s+\d+$') |  # Mint + count
+            filters.Regex(r'^[1-9A-HJ-NP-Za-km-z]{32,44}$')  # Mint only
+        ),
+        handle_holders_input
+    )
 ]
