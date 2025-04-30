@@ -1,4 +1,3 @@
-```markdown
 # 🚀 Vybe Analytics Telegram Bot
 
 Vybe Analytics Telegram Bot is a powerful Telegram bot that provides real-time, on-chain insights using Vybe Network APIs. From tracking wallet balances to showing the top token holders and whale alerts, this bot delivers instant analytics to any Telegram user.  
@@ -164,4 +163,3 @@ MIT License — free to use and modify. See the [LICENSE](LICENSE) file for deta
 ---
 
 Made with 💙 by [Kosisochukwu](https://kosisochukwu.onrender.com) using [Vybe Network](https://vybenetwork.xyz).  
-```
