@@ -21,7 +21,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [
             InlineKeyboardButton("🐋 Whale Alerts", callback_data="menu_whale"),
             InlineKeyboardButton("🎓 Tutorial", callback_data="menu_tutorial")
-        ]
+        ],
+        [InlineKeyboardButton("ALPHAVYBE", url="https://vybe.fyi/")]
     ]
 
     message_text = (
@@ -95,7 +96,8 @@ async def generate_menu_keyboard():
          InlineKeyboardButton("Pyth Data ⚙️", callback_data="menu_pyth")],
         [InlineKeyboardButton("Whale Alerts 🐋", callback_data="menu_whale"),
          InlineKeyboardButton("Tutorial 🎓", callback_data="menu_tutorial")],
-        [InlineKeyboardButton("Refresh Menu 🔄", callback_data="main_menu")]
+        [InlineKeyboardButton("Refresh Menu 🔄", callback_data="main_menu")],
+        [InlineKeyboardButton("ALPHAVYBE", url="https://vybe.fyi/")]
     ])
 
 

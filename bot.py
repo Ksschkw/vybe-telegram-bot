@@ -1,4 +1,5 @@
-from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters
+from telegram import InlineKeyboardMarkup, Update, InlineKeyboardButton
+from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
 from config import TELEGRAM_TOKEN
 from slashmain import (
     handle_typos,
@@ -12,8 +13,7 @@ from slashmain import (
     tutorial_start,
     tutorial_callback
 )
-
-# Import handler modules
+from handlers.state import USER_STATE  # Import global USER_STATE
 import handlers.start as start_h
 import handlers.accounts as acct_h
 import handlers.prices as prices_h
@@ -23,14 +23,31 @@ import handlers.nft_analysis as nft_h
 import handlers.pyth as pyth_h
 import handlers.tutorial as tut_h
 import handlers.whale_alert as whale_h
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 app = Application.builder().token(TELEGRAM_TOKEN).build()
 
-# ========================
-# Handler Registration Order Matters!
-# ========================
+# Modified handle_typos to skip chart flow
+async def handle_typos(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    uid = update.effective_user.id
+    state = USER_STATE.get(uid, {})
+    if state.get("flow") == "chart":
+        logger.info(f"handle_typos: Skipped for user {uid} in chart flow, state: {state}")
+        return
+    logger.info(f"handle_typos: User {uid}, input: '{update.message.text}'")
+    keyboard =  [InlineKeyboardButton("ALPHAVYBE", url="https://vybe.fyi/")]
+    await update.message.reply_text(
+        "🤖Try these:\n"
+        "• /start - Show main menu\n"
+        "• /tutorial - Beginner's guide\n"
+        "• Type /commands for full list",
+        reply_markup=InlineKeyboardMarkup([keyboard]),
+        )
 
-# 1. Command Handlers (Slash Commands)
+# Handler Registration
 app.add_handlers([
     CommandHandler("start", start_h.start),
     CommandHandler("help", start_h.start),
@@ -38,51 +55,40 @@ app.add_handlers([
     CommandHandler("balance", get_balance),
     CommandHandler("whalealert", whale_alert),
     CommandHandler("prices", check_prices),
-    CommandHandler("tokendetails", token_details),  # Fixed naming consistency
+    CommandHandler("tokendetails", token_details),
     CommandHandler("topholders", top_token_holders),
     CommandHandler("chart", chart),
     CommandHandler("nft_analysis", nft_analysis),
     CommandHandler("tutorial", tutorial_start)
 ])
 
-# 2. Callback Query Handlers (Menu System)
 app.add_handlers([
-    # Main menu handlers
     *start_h.menu_handlers,
-    
-    # Tutorial callback
     CallbackQueryHandler(tutorial_callback, pattern="^tutorial_"),
-    
-    # Whale Alert menu
     CallbackQueryHandler(whale_h.start_whale, pattern="^menu_whale$")
 ])
 
-# 3. Flow Handlers (Message-based interactions)
 all_flow_handlers = [
+    *chart_h.handlers,
+    *pyth_h.handlers,
     *acct_h.handlers,
     *prices_h.handlers,
-    *chart_h.handlers,
     *holders_h.handlers,
     *nft_h.handlers,
-    *pyth_h.handlers,
     *tut_h.handlers,
     *whale_h.handlers
 ]
 
 for handler in all_flow_handlers:
-    app.add_handler(handler)
+    app.add_handler(handler, group=0)
 
-# 4. Typo Handler - MUST BE LAST!
 app.add_handler(
     MessageHandler(
         filters.TEXT & ~filters.COMMAND & ~filters.Regex(r'^/'),
         handle_typos
     ),
-    group=1  # Higher group number processes last
+    group=50
 )
 
-# ========================
-# Start Polling
-# ========================
 if __name__ == "__main__":
     app.run_polling()

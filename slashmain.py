@@ -147,11 +147,16 @@ async def handle_typos(update: Update, context: ContextTypes.DEFAULT_TYPE):
             parse_mode="Markdown"
         )
     else:
-        await update.message.reply_text(
-            "🤖 I don't recognize that command. Try these:\n"
+        caption = (
+            "🤖Try these:\n"
             "• /start - Show main menu\n"
             "• /tutorial - Beginner's guide\n"
-            "• Type /commands for full list",
+            "• Type /commands for full list"
+        )
+        keyboard = [InlineKeyboardButton("ALPHAVYBE", url="https://vybe.fyi/")]
+        await update.message.reply_text(
+            caption=caption,
+            reply_markup = InlineKeyboardMarkup(keyboard),
             parse_mode="Markdown"
         )
 

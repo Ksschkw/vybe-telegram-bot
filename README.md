@@ -72,7 +72,7 @@ For users who prefer buttons and guided prompts, VybeVigil supports fully intera
 | **Chart**         | 📈 Select timeframe (7 d or 30 d) then input mint for price charts. |
 | **Holders**       | 👑 Tap to request top holders; then send `<mint> <count>`.    |
 | **NFT Analytics** | 🖼 Choose “Analyze” and enter a collection address for owner stats. |
-| **Pyth OHLC**     | ⚙️ Pick 1 h/4 h/1 d, then supply a mint to get recent OHLC data. |
+| **Pyth OHLC**     | 📊 Select "Hourly Summary", choose an interval (e.g., hourly, 4h, daily), and provide a mint address with start/end dates (YYYY-MM-DD) for OHLC data. |
 | **Tutorial**      | 🔰 Step through a multi-page guide on all core commands.      |
 
 ---
