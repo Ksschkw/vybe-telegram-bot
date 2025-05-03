@@ -55,7 +55,7 @@ app.add_handlers([
     CommandHandler("balance", get_balance),
     CommandHandler("whalealert", whale_alert),
     CommandHandler("prices", check_prices),
-    CommandHandler("tokendetails", token_details),
+    CommandHandler("tokenDetails", token_details),
     CommandHandler("topholders", top_token_holders),
     CommandHandler("chart", chart),
     CommandHandler("nft_analysis", nft_analysis),
