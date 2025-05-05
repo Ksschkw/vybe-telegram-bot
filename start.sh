@@ -17,7 +17,8 @@ fi
 export DISPLAY=:99
 
 echo "Starting Vybe Analytics Bot..."
-exec python -u bot.py
+# Trap to ensure Xvfb is killed on script exit (e.g., error or Ctrl+C)
+trap 'kill $XVFB_PID 2>/dev/null; exit 1' INT TERM EXIT
 
-# Cleanup if bot exits
-kill $XVFB_PID
+# Run the bot with unbuffered output
+exec python -u bot.py
