@@ -51,7 +51,7 @@ async def chart_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     logger.info(f"chart_callback: User {uid} selected {choice}, state: {USER_STATE[uid]}")
     
     if choice in ("7d", "30d"):
-        prompt = "🔎 Send token mint address (e.g., JBu1AL4obBcCMqKBBxhpWCNUt136ijcuMZLFvTP7iWdB):"
+        prompt = "🔎 Send token mint address (e.g., Grass7B4RdKfBCjTKgSqnXkqjwiGvQyFbuSCUJr3XXjs):"
     else:
         prompt = "📅 Send start and end timestamps (e.g., `1633046400 1635724800`):"
     

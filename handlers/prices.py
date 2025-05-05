@@ -78,8 +78,9 @@ async def prices_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if analysis_type == "top":
         prompt = "🔢 How many tokens to display? (1-25)"
     else:
-        prompt = "🔎 Send token mint address:"
-    
+        # prompt = "🔎 Send token mint address:"
+        prompt = "Please use /tokenDetails <mint address> or /tokendetails <mint address>\n either one works"
+
     await q.message.edit_text(
         prompt,
         reply_markup=InlineKeyboardMarkup(CANCEL_BUTTON),
