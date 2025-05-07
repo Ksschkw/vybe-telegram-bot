@@ -283,14 +283,14 @@ async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await page.goto(url, wait_until="networkidle", timeout=30000)
 
             # Wait for the cookie popup to appear
-            try:
-                await page.wait_for_selector('button[title="ACCEPT ALL"]', state="visible", timeout=10000)
-                # Click the "ACCEPT ALL" button to dismiss the cookie popup
-                await page.click('button[title="ACCEPT ALL"]')
-                # Wait for the popup to disappear
-                await page.wait_for_selector('button[title="ACCEPT ALL"]', state="detached", timeout=5000)
-            except Exception as e:
-                print(f"No cookie popup found or error handling popup: {e}")
+            # try:
+            #     await page.wait_for_selector('button[title="ACCEPT ALL"]', state="visible", timeout=10000)
+            #     # Click the "ACCEPT ALL" button to dismiss the cookie popup
+            #     await page.click('button[title="ACCEPT ALL"]')
+            #     # Wait for the popup to disappear
+            #     await page.wait_for_selector('button[title="ACCEPT ALL"]', state="detached", timeout=5000)
+            # except Exception as e:
+            #     print(f"No cookie popup found or error handling popup: {e}")
 
             # Wait for the chart canvas to be visible
             chart_found = False
@@ -300,11 +300,11 @@ async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 chart_found = True
 
                 # Add a longer delay to ensure chart data is loaded and rendered
-                await asyncio.sleep(5)  # Increased to 5 seconds for chart rendering
+                # await asyncio.sleep(5)  # Increased to 5 seconds for chart rendering
 
                 # Scroll to the chart area to ensure it’s in view and fully rendered
                 await page.evaluate("document.querySelector('div.chart-gui-wrapper canvas').scrollIntoView()")
-                await asyncio.sleep(2)  # Increased delay after scrolling to 2 seconds
+                # await asyncio.sleep(2)  # Increased delay after scrolling to 2 seconds
 
                 # Optional: Check if the chart has a loading spinner and wait for it to disappear
                 try:
@@ -321,7 +321,7 @@ async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
             caption = token_info
             keyboard = [InlineKeyboardButton("Track live on ALPHAVYBE", url=f"https://vybe.fyi/tokens/{token_mint}")]
             if not chart_found:
-                caption += "\n\n⚠️ Note: Chart may be missing or failed to load in the screenshot."
+                caption += "⚠️ Note: Chart may be missing or failed to load in the screenshot."
             await update.message.reply_photo(
                 photo=open(screenshot_path, "rb"),
                 caption=caption,
