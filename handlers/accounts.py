@@ -83,7 +83,7 @@ async def start_accounts(update: Update, context: ContextTypes.DEFAULT_TYPE):
     kb = [
         [InlineKeyboardButton("Known Accounts", callback_data="acct_known")],
         [InlineKeyboardButton("Wallet Balance", callback_data="acct_balance")],
-        [InlineKeyboardButton("Balance History", callback_data="acct_balance_ts")],
+        # [InlineKeyboardButton("Balance History", callback_data="acct_balance_ts")],
         [InlineKeyboardButton("🔙 Main Menu", callback_data="main_menu")]
     ]
     await update.callback_query.message.reply_text(
@@ -113,8 +113,8 @@ async def accounts_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await handle_known_accounts(update, context)
     else:
         prompt_text = {
-            "balance": "🔍 Send wallet address for balance:",
-            "balance_ts": "📈 Send wallet address for history:"
+            "balance": "🔍 Send  /balance <wallet>:",
+            # "balance_ts": "📈 Send wallet address for history:"
         }[action]
         
         await q.message.edit_text(
