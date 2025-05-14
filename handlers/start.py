@@ -134,7 +134,7 @@ from handlers.holders import start_holders
 from handlers.nft_analysis import start_nft
 from handlers.pyth import start_pyth
 from handlers.tutorial import tutorial_start
-from slashmain        import whale_alert
+from slashcommands.slashmain        import whale_alert
 
 menu_handlers = [
     CallbackQueryHandler(start_accounts, pattern="^menu_accounts$"),

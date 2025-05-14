@@ -1,13 +1,17 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup ,WebAppInfo
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters, CallbackQueryHandler
 from handlers.state import *
-import slashutils
+import slashcommands.slashutils as slashutils
 import os
 from dotenv import load_dotenv
 from datetime import datetime
 import logging
 import time
 import aiohttp
+import matplotlib
+matplotlib.use('Agg')  # Headless backend for server environments
+import matplotlib.pyplot as plt
+from io import BytesIO
 
 load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
@@ -336,7 +340,8 @@ async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Delete the "Loading" message if an error occurs
             await loading_message.delete()
             await update.message.reply_text(
-                f"⚠️ Error generating screenshot: {str(e)}\n\nToken Info:\n{token_info}",
+                f"⚠️ Error generating screenshot: \n\n📊 Token Stats:\n{token_info}",
+                # {str(e)}
                 parse_mode="Markdown"
             )
         finally:
@@ -466,26 +471,87 @@ async def top_token_holders(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("😕 No data found for this token.", parse_mode="Markdown")
             return
 
-        # message = f"👑 *Top {count} Holders of Token:* `{mint_address}`\n\n"
-        token_symbol = holders[0].get("tokenSymbol", "N/A")
+        # **Step 1: Prepare data for the chart**
+        balances = []
+        percentages = []
+        labels = []
+        for holder in holders:
+            try:
+                balance = float(holder['balance'])  # Convert balance to float
+            except (ValueError, TypeError):
+                balance = 0.0  # Default to 0 if conversion fails
+            balances.append(balance)
+            try:
+                percentage = float(holder['percentageOfSupplyHeld'])  # Convert percentage
+            except (ValueError, TypeError):
+                percentage = 0.0
+            percentages.append(percentage)
+            # Use ownerName if available, else truncate ownerAddress
+            name = holder.get('ownerName')
+            if name:
+                label = name[:20]  # Limit name length to avoid clutter
+            else:
+                addr = holder.get('ownerAddress', 'Unknown')
+                label = f"{addr[:4]}...{addr[-4:]}"  # Truncate to first 4 + last 4 chars
+            labels.append(label)
+
+        # **Step 2: Generate the bar chart with dual axes**
+        fig, ax1 = plt.subplots(figsize=(10, 7))  # Increased height for vertical labels
+        ax1.bar(labels, balances, color='skyblue', alpha=0.6, label='Amount Held')
+        ax1.set_xlabel('Holder')
+        ax1.set_ylabel('Amount Held', color='skyblue')
+        ax1.tick_params(axis='y', labelcolor='skyblue')
+        ax1.set_xticks(range(len(labels)))
+        ax1.set_xticklabels(labels, rotation=90, ha='center', fontsize=8)  # Vertical labels
+
+        # Secondary axis for percentage
+        ax2 = ax1.twinx()
+        ax2.plot(labels, percentages, color='orange', marker='o', label='% Supply Held')
+        ax2.set_ylabel('% Supply Held', color='orange')
+        ax2.tick_params(axis='y', labelcolor='orange')
+
+        # Title with token name or mint address
+        token_symbol = holders[0].get("tokenSymbol", None)
+        title = f"Top {count} Holders of {token_symbol if token_symbol and token_symbol != 'N/A' else mint_address}"
+        plt.title(title)
+
+        # Combine legends
+        lines1, labels1 = ax1.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper right')
+
+        # Adjust layout to prevent cutoff
+        plt.tight_layout()
+
+        # Save chart to a BytesIO object
+        buf = BytesIO()
+        plt.savefig(buf, format='png', bbox_inches='tight')
+        buf.seek(0)
+        plt.close()  # Free up memory
+
+        # **Step 3: Send the chart with a brief caption**
+        await update.message.reply_photo(
+            photo=buf,
+            caption=f"📊 Top {count} holders of {token_symbol if token_symbol and token_symbol != 'N/A' else mint_address}"
+        )
+        buf.close()  # Clean up
+
+        # **Step 4: Send the detailed text as separate messages**
         message = (
-            f"👑 *Top {count} Holders of Token:* `{mint_address}` — *{token_symbol}*\n"
+            f"👑 *Top {count} Holders of Token:* `{mint_address}` — *{token_symbol if token_symbol else 'N/A'}*\n"
             f"🔔 [see more insights on Alphavybe](https://alpha.vybenetwork.com/)\n\n"
         )
-
-
         for holder in holders:
             message += (
                 f"🏅 Rank: {holder.get('rank', 'N/A')}\n"
-                f"🧾 Name: {holder.get('ownerName') or 'N/A'}\n"
+                f"🧾 {holder.get('ownerName') or 'N/A'}\n"
                 f"📦 Address: `{holder.get('ownerAddress')}`\n"
                 f"💰 Balance: {holder.get('balance', 'N/A')}\n"
                 f"💵 USD Value: ${float(holder.get('valueUsd', 0)):.2f}\n"
                 f"📈 % Supply Held: {holder.get('percentageOfSupplyHeld', 0):.4f}%\n\n"
-                # f"🔔 [see more insights](https://alpha.vybenetwork.com/)\n\n\n\n"
-
             )
-
+        
+        # Split and send the message in chunks
         for chunk in slashutils.chunk_message(message):
             await update.message.reply_text(chunk, parse_mode="Markdown")
 

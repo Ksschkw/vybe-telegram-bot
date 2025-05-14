@@ -1,8 +1,12 @@
-# handlers/holders.py
 import aiohttp
 from datetime import datetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackQueryHandler, MessageHandler, filters, ContextTypes
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from io import BytesIO
+
 from handlers.state import USER_STATE, CANCEL_BUTTON
 
 def chunk_message(text: str, size: int = 4096) -> list:
@@ -106,6 +110,16 @@ async def handle_holders_input(update: Update, context: ContextTypes.DEFAULT_TYP
                 raise ValueError("Count must be 1-25")
             
             holders = await fetch_top_holders(mint, count)
+            if holders:
+                buf = generate_holders_chart(holders, mint, count)
+                if buf:
+                    token_symbol = holders[0].get("tokenSymbol", "N/A")
+                    display_name = token_symbol if token_symbol != "N/A" else mint
+                    await update.message.reply_photo(
+                        photo=buf,
+                        caption=f"📊 Top {count} holders of {display_name}"
+                    )
+                    buf.close()
             response = format_top_holders(mint, holders)
             
         else:  # holders_ts
@@ -126,24 +140,88 @@ async def handle_holders_input(update: Update, context: ContextTypes.DEFAULT_TYP
         USER_STATE.pop(uid, None)
         await show_followup_menu(update)
 
+def generate_holders_chart(holders, mint, count):
+    """Generate a bar chart for top holders"""
+    try:
+        # Prepare data
+        balances = []
+        percentages = []
+        labels = []
+        for holder in holders:
+            try:
+                balance = float(holder.get("balance", 0))
+            except (ValueError, TypeError):
+                balance = 0.0
+            balances.append(balance)
+            try:
+                percentage = float(holder.get("percentageOfSupplyHeld", 0))
+            except (ValueError, TypeError):
+                percentage = 0.0
+            percentages.append(percentage)
+            name = holder.get("ownerName")
+            if name:
+                label = name[:20]
+            else:
+                addr = holder.get("ownerAddress", "Unknown")
+                label = f"{addr[:4]}...{addr[-4:]}"
+            labels.append(label)
+
+        # Generate chart
+        fig, ax1 = plt.subplots(figsize=(10, 8))
+        ax1.bar(labels, balances, color="skyblue", alpha=0.6, label="Amount Held")
+        ax1.set_xlabel("Holder")
+        ax1.set_ylabel("Amount Held", color="skyblue")
+        ax1.tick_params(axis="y", labelcolor="skyblue")
+        ax1.set_xticks(range(len(labels)))
+        ax1.set_xticklabels(labels, rotation=90, ha="center", fontsize=7)
+
+        ax2 = ax1.twinx()
+        ax2.plot(labels, percentages, color="orange", marker="o", label="% Supply Held")
+        ax2.set_ylabel("% Supply Held", color="orange")
+        ax2.tick_params(axis="y", labelcolor="orange")
+
+        token_symbol = holders[0].get("tokenSymbol", None)
+        display_name = token_symbol if token_symbol and token_symbol != "N/A" else mint
+        plt.title(f"Top {count} Holders of {display_name}")
+
+        lines1, labels1 = ax1.get_legend_handles_labels()
+        lines2, labels2 = ax2.get_legend_handles_labels()
+        ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper right")
+
+        plt.tight_layout()
+
+        buf = BytesIO()
+        plt.savefig(buf, format="png", bbox_inches="tight")
+        buf.seek(0)
+        plt.close()
+        return buf
+    except Exception as e:
+        print(f"Error generating chart: {e}")
+        return None
+
 def format_top_holders(mint: str, holders: list) -> str:
     """Format top holders response"""
     if not holders:
         return "👀 No holders found for this token"
     
-    lines = [f"👑 Top {len(holders)} Holders of `{mint[:6]}...{mint[-4:]}`"]
+    token_symbol = holders[0].get("tokenSymbol", "N/A")
+    display_name = token_symbol if token_symbol != "N/A" else f"{mint[:6]}...{mint[-4:]}"
+    lines = [f"👑 Top {len(holders)} Holders of `{display_name}`"]
     for i, holder in enumerate(holders, 1):
+        name = holder.get("ownerName")
         addr = holder.get("ownerAddress", "N/A")
-        balance = float(holder.get("balance", 0))
+        balance = holder.get("balance", "N/A")
         usd = float(holder.get("valueUsd", 0))
         pct = float(holder.get("percentageOfSupplyHeld", 0))
         
-        lines.append(
-            f"{i}. `{addr}`\n"
-            f"   Balance: {balance:.2f}\n"
-            f"   Value: ${usd:,.2f}\n"
-            f"   Supply %: {pct:.4f}%"
-        )
+        holder_info = f"{i}. "
+        if name:
+            holder_info += f"Name: {name}\n   "
+        holder_info += f"Address: `{addr}`\n"
+        holder_info += f"   Balance: {balance}\n"
+        holder_info += f"   Value: ${usd:,.2f}\n"
+        holder_info += f"   Supply %: {pct:.4f}%"
+        lines.append(holder_info)
     return "\n\n".join(lines)
 
 def format_holders_ts(mint: str, series: list) -> str:

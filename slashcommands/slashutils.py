@@ -205,8 +205,8 @@ async def get_token_price(
 
     return message
     
-async def get_token_details(mintAddress):
-    """Get token details with formatted output"""
+async def get_token_details(mintAddress: str) -> str:
+    """Get token details with formatted output including all available fields"""
     url = f"{VYBE_BASE_URL}/token/{mintAddress}"
     headers = {"X-API-KEY": VYBE_API_KEY, "accept": "application/json"}
     
@@ -222,16 +222,31 @@ async def get_token_details(mintAddress):
         # Format large numbers
         current_supply = "{:,.2f}".format(data.get('currentSupply', 0))
         market_cap = "${:,.2f}".format(data.get('marketCap', 0)) if data.get('marketCap') else "N/A"
+        volume_24h = "${:,.2f}".format(data.get('usdValueVolume24h', 0)) if data.get('usdValueVolume24h') else "N/A"
+
+        # Handle null fields
+        category = data.get('category', 'None') if data.get('category') is not None else "None"
+        subcategory = data.get('subcategory', 'None') if data.get('subcategory') is not None else "None"
+        token_volume_24h = "{:,.2f}".format(data.get('tokenAmountVolume24h', 0)) if data.get('tokenAmountVolume24h') else "N/A"
 
         return (
-            f"🔍 {data.get('name', 'Unknown Token')} ({data.get('symbol', 'N/A')})\n\n"
-            f"🆔 Mint Address: `{mintAddress[:6]}...{mintAddress[-4:]}`\n\n"
-            f"📅 Last Updated: {formatted_date}\n\n"
-            f"💰 Price: ${data.get('price', 0):.4f}\n\n"
-            f"📈 Market Cap: {market_cap}\n\n"
-            f"🔄 Current Supply: {current_supply}\n\n"
-            f"🔢 Decimals: {data.get('decimal', 'N/A')}\n\n"
-            f"✅ Verified: {'Yes' if data.get('verified') else 'No'}\n\n"
+            f"├ 🔍 {data.get('name', 'Unknown Token')} ({data.get('symbol', 'N/A')})\n"
+            f" |\n"
+            f"├ 🆔 Mint Address: `{mintAddress[:6]}...{mintAddress[-4:]}`\n"
+            # f"🖼️ Logo: {data.get('logoUrl', 'N/A')}\n\n"
+            f"├ 📅 Last Updated: {formatted_date}\n"
+            f" |\n"
+            f"├ 💰 Price:  ${data.get('price', 0):.4f}\n"
+            f"├ 📉 1D Change:  {data.get('price1d', 0):+.2f}%\n"
+            f"├ 📉 7D Change:  {data.get('price7d', 0):+.2f}%\n"
+            f"├ 📈 Market Cap:  {market_cap}\n"
+            f"├ 💸 24H Volume (USD):  {volume_24h}\n"
+            f"├ 💾 24H Volume (Tokens):  {token_volume_24h}\n"
+            f"├ 🔄 Current Supply:  {current_supply}\n"
+            f"├ 🔢 Decimals:  {data.get('decimal', 'N/A')}\n"
+            f"├ 🏷️ Category:  {category}\n"
+            f"├ 🏷️ Subcategory:  {subcategory}\n"
+            f"└ ✅ Verified?:  {'Yes' if data.get('verified') else 'No'}\n"
         )
 
     except Exception as e:

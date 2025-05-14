@@ -1,7 +1,7 @@
 from telegram import InlineKeyboardMarkup, Update, InlineKeyboardButton
 from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
 from config import TELEGRAM_TOKEN
-from slashmain import (
+from slashcommands.slashmain import (
     handle_typos,
     get_balance,
     whale_alert,

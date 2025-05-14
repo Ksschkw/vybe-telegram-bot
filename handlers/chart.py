@@ -3,7 +3,7 @@ import time
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackQueryHandler, MessageHandler, filters, ContextTypes
 from datetime import datetime, UTC
-from slashutils import fetch_ohlcv_data, generate_price_chart, get_token_name_for_chart
+from slashcommands.slashutils import fetch_ohlcv_data, generate_price_chart, get_token_name_for_chart
 from handlers.state import USER_STATE, CANCEL_BUTTON
 import logging
 
