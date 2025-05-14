@@ -257,14 +257,49 @@ async def tutorial_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 #     token_mint = context.args[0]
 #     token_info = await slashutils.get_token_details(token_mint)
 #     await update.message.reply_text(token_info, parse_mode="Markdown")
-from playwright.async_api import async_playwright
+import os
 import asyncio
+from playwright.async_api import async_playwright, TimeoutError as PlaywrightTimeoutError
+
+# List of possible cookie-banner selectors
+COOKIE_SELECTORS = [
+    'button[title="ACCEPT ALL"]',
+    'button:has-text("Accept All")',
+    'button:has-text("Accept Cookies")',
+    'text="Accept"'
+]
+
+async def _dismiss_cookies(page):
+    """Try each selector briefly to click any cookie-accept button."""
+    await page.wait_for_timeout(1000)
+    for sel in COOKIE_SELECTORS:
+        try:
+            btn = page.locator(sel)
+            if await btn.is_visible(timeout=2000):
+                await btn.click()
+                await page.wait_for_timeout(500)
+                return True
+        except PlaywrightTimeoutError:
+            continue
+    return False
+
+async def _take_screenshot(page, path):
+    """Wait for the chart canvas to be visible, then scroll and snapshot."""
+    await page.wait_for_selector('div.chart-gui-wrapper canvas', state="visible", timeout=15000)
+    await page.evaluate("document.querySelector('div.chart-gui-wrapper canvas').scrollIntoView()")
+    try:
+        await page.wait_for_selector('div.chart-gui-wrapper .loading-spinner', state="detached", timeout=10000)
+    except PlaywrightTimeoutError:
+        pass
+    await page.wait_for_timeout(2000)
+    await page.screenshot(path=path, full_page=True)
 
 async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Handle /tokendetails command"""
+    """Handle /tokendetails: send token info immediately, then load & send chart."""
     if not context.args:
         await update.message.reply_text(
-            "⚠️ Please provide a token mint address\nExample: /tokenDetails EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+            "⚠️ Please provide a token mint address\n"
+            "Example: /tokenDetails EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
         )
         return
 
@@ -272,82 +307,62 @@ async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = f"https://vybe.fyi/tokens/{token_mint}"
     screenshot_path = f"screenshot_{token_mint}.png"
 
-    # Send a "Loading" message to the user
-    loading_message = await update.message.reply_text("⏳ Loading chart with token details...")
-
-    # Get token details (assuming slashutils.get_token_details works as before)
+    # 1) Send token info immediately
     token_info = await slashutils.get_token_details(token_mint)
+    info_text = (
+        f"{token_info}\n\n"
+        "Please hold while we load the token chart..."
+    )
+    info_keyboard = InlineKeyboardMarkup(
+        [[InlineKeyboardButton("Track live on ALPHAVYBE", url=url)]]
+    )
+    await update.message.reply_text(
+        info_text,
+        reply_markup=info_keyboard,
+        parse_mode="Markdown"
+    )
 
-    # Use Playwright to take a screenshot
+    # 2) Send a separate "Loading chart" message
+    loading_msg = await update.message.reply_text("⏳ Loading chart image...")
+
+    # 3) Generate screenshot in background
+    chart_found = False
     async with async_playwright() as p:
-        browser = await p.chromium.launch()
+        browser = await p.chromium.launch(headless=True, args=['--no-sandbox'])
         page = await browser.new_page()
         try:
-            # Navigate to the page with a timeout
-            await page.goto(url, wait_until="networkidle", timeout=30000)
-
-            # Wait for the cookie popup to appear
-            # try:
-            #     await page.wait_for_selector('button[title="ACCEPT ALL"]', state="visible", timeout=10000)
-            #     # Click the "ACCEPT ALL" button to dismiss the cookie popup
-            #     await page.click('button[title="ACCEPT ALL"]')
-            #     # Wait for the popup to disappear
-            #     await page.wait_for_selector('button[title="ACCEPT ALL"]', state="detached", timeout=5000)
-            # except Exception as e:
-            #     print(f"No cookie popup found or error handling popup: {e}")
-
-            # Wait for the chart canvas to be visible
-            chart_found = False
-            try:
-                # Use the generic selector for the canvas inside chart-gui-wrapper
-                await page.wait_for_selector('div.chart-gui-wrapper canvas', state="visible", timeout=15000)
-                chart_found = True
-
-                # Add a longer delay to ensure chart data is loaded and rendered
-                # await asyncio.sleep(5)  # Increased to 5 seconds for chart rendering
-
-                # Scroll to the chart area to ensure it’s in view and fully rendered
-                await page.evaluate("document.querySelector('div.chart-gui-wrapper canvas').scrollIntoView()")
-                # await asyncio.sleep(2)  # Increased delay after scrolling to 2 seconds
-
-                # Optional: Check if the chart has a loading spinner and wait for it to disappear
-                try:
-                    await page.wait_for_selector('div.chart-gui-wrapper .loading-spinner', state="detached", timeout=10000)
-                except Exception:
-                    pass  # No spinner or already gone
-            except Exception as e:
-                print(f"Chart not found or failed to load: {e}")
-
-            # Take screenshot
-            await page.screenshot(path=screenshot_path, full_page=True)
-
-            # Reply with both screenshot and token info, with a note if chart is missing
-            caption = token_info
-            keyboard = [InlineKeyboardButton("Track live on ALPHAVYBE", url=f"https://vybe.fyi/tokens/{token_mint}")]
-            if not chart_found:
-                caption += "⚠️ Note: Chart may be missing or failed to load in the screenshot."
-            await update.message.reply_photo(
-                photo=open(screenshot_path, "rb"),
-                caption=caption,
-                reply_markup=InlineKeyboardMarkup([keyboard]),
-                parse_mode="Markdown"
-            )
-
-            # Optionally delete the "Loading" message after the main message is sent
-            await loading_message.delete()
-
+            await page.goto(url, wait_until="networkidle0", timeout=30000)
+            await _dismiss_cookies(page)
+            await _take_screenshot(page, screenshot_path)
+            chart_found = True
         except Exception as e:
-            # Delete the "Loading" message if an error occurs
-            await loading_message.delete()
-            await update.message.reply_text(
-                f"⚠️ Error generating screenshot: \n\n📊 Token Stats:\n{token_info}",
-                # {str(e)}
-                parse_mode="Markdown"
-            )
+            print(f"[token_details] screenshot error: {e}")
         finally:
             await browser.close()
 
-    # Clean up screenshot file
+    # Remove the loading message
+    await loading_msg.delete()
+
+    # 4) Send chart or fallback
+    if chart_found and os.path.exists(screenshot_path):
+        chart_caption = f"Chart for `{token_mint}`"
+        chart_keyboard = InlineKeyboardMarkup(
+            [[InlineKeyboardButton("View live chart on ALPHAVYBE", url=url)]]
+        )
+        with open(screenshot_path, "rb") as img:
+            await update.message.reply_photo(
+                photo=img,
+                caption=chart_caption,
+                reply_markup=chart_keyboard,
+                parse_mode="Markdown"
+            )
+    else:
+        await update.message.reply_text(
+            f"⚠️ Could not generate chart image.\n"
+            f"You can view it live here:\n{url}"
+        )
+
+    # Cleanup temp file
     if os.path.exists(screenshot_path):
         os.remove(screenshot_path)
 
