@@ -356,7 +356,7 @@ async def token_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [[InlineKeyboardButton("View live chart on ALPHAVYBE", url=url)]]
         )
         await update.message.reply_text(
-            "⚠️ Could not generate chart image.\nYou can view it live here(PSA:you can also use the /chart command to get a simple chart):",
+            "⚠️ Could not generate chart image.\n( PSA:you can also use the /chart command to get a simple chart)\nYou can view it live here:",
             reply_markup=fallback_keyboard
         )
 
