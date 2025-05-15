@@ -1,6 +1,6 @@
 # 🚀 Vybe Analytics Telegram Bot
 
-Vybe Analytics Telegram Bot is a powerful Telegram bot that provides real-time, on-chain insights using Vybe Network APIs. From tracking wallet balances to showing the top token holders and whale alerts, this bot delivers instant analytics to any Telegram user.  
+Vybe Analytics Telegram Bot is a powerful Telegram bot that provides real-time, on-chain insights using Vybe Network APIs. From tracking wallet balances to showing the top token holders, whale alerts, and now your **favorite** accounts and tokens, this bot delivers instant analytics to any Telegram user.  
 🤖 **Try The Bot**: [VybeVigil](https://t.me/VybeVigil_bot)
 
 ## 📝 Project Summary
@@ -15,15 +15,15 @@ Although unit tests aren’t part of the current release, my roadmap includes th
 
 ## 🔌 Vybe API Integration
 
-| Command           | Vybe API Endpoint                                                  | Description                               |
-|-------------------|--------------------------------------------------------------------|-------------------------------------------|
-| `/balance`        | `/account/token-balance/{address}`                                 | Wallet balances and SOL staking data      |
-| `/chart`          | `/price/{mint}/token-ohlcv`                                        | OHLCV data for price charts               |
-| `/whalealert`     | `/token/transfers`                                                 | Whale transfers filtered by USD threshold |
-| `/prices`         | `/tokens`                                                          | Retrieves a list of tracked tokens        |
-| `/tokendetails`   | `/token/{mintAddress}`                                             | Retrieves details of the specified token  |
-| `/topholders`     | `/token/{mintAddress}/top-holders`                                 | Retrieves the top token holders           |
-| `/nft_analysis`   | `/nft/collection-owners/{address}`                                 | Wallets owning NFTs in the collection     |
+| Command            | Vybe API Endpoint                                                 | Description                                 |
+|--------------------|-------------------------------------------------------------------|---------------------------------------------|
+| `/balance`         | `/account/token-balance/{address}`                                | Wallet balances and SOL staking data        |
+| `/chart`           | `/price/{mint}/token-ohlcv`                                       | OHLCV data for price charts                 |
+| `/whalealert`      | `/token/transfers`                                                | Whale transfers filtered by USD threshold   |
+| `/prices`          | `/tokens`                                                         | Retrieves a list of tracked tokens          |
+| `/tokendetails`    | `/token/{mintAddress}`                                            | Retrieves details of the specified token    |
+| `/topholders`      | `/token/{mintAddress}/top-holders`                                | Retrieves the top token holders             |
+| `/nft_analysis`    | `/nft/collection-owners/{address}`                                | Wallets owning NFTs in the collection       |
 
 ---
 
@@ -36,7 +36,10 @@ Although unit tests aren’t part of the current release, my roadmap includes th
 - 🔍 **Token Details**: Retrieve full details about any token by its mint address.  
 - 👑 **Top Token Holders**: View the richest wallets holding a particular token.  
 - 🖼 **NFT Analytics**: Analyze NFT collection ownership distributions.  
-- 🎮 **Interactive Tutorial**: Step through a guided, button-driven tutorial on all core commands.  
+- ⭐ **Favorites**:  
+  - `/addfavoriteaccount` & `/favoriteaccounts` — Save and manage your most-used wallet addresses.  
+  - `/addfavoritetoken` & `/favoritetokens` — Save and manage your go-to token mints.  
+- 🎮 **Interactive Tutorial**: Step through a guided, button-driven tutorial on all core commands.
 
 ### 🤖 Smart Command Correction
 
@@ -50,30 +53,34 @@ We all make typos! The bot automatically suggests corrections for common mistake
 
 **Example Interaction:**  
 ```
-User:  pric solana  
-Bot:   ❓ Did you mean /prices?  
-       Try: `/prices <token_mint> [count]`  
 
-User:  whal  
-Bot:   ❓ Did you mean /whalealert?  
-       Try: `/whalealert [threshold] [limit]`
-```
+User:  pric solana
+Bot:   ❓ Did you mean /prices?
+Try: /prices \<token\_mint> \[count]
+
+User:  whal
+Bot:   ❓ Did you mean /whalealert?
+Try: /whalealert \[threshold] \[limit]
+
+````
 
 ---
 
 ## 🤖 Interactive Command Flows
 
-For users who prefer buttons and guided prompts, VybeVigil supports fully interactive menus. Simply tap `/start`, then choose from:
+Tap `/start` to open the main menu, then choose any of these buttons:
 
-| Menu Button       | Description                                                  |
-|-------------------|--------------------------------------------------------------|
-| **Accounts**      | 💼 View known accounts, check balances, or see balance history. |
-| **Prices**        | 📊 Fetch top tokens or lookup a specific mint interactively. |
-| **Chart**         | 📈 Select timeframe (7 d or 30 d) then input mint for price charts. |
-| **Holders**       | 👑 Tap to request top holders; then send `<mint> <count>`.    |
-| **NFT Analytics** | 🖼 Choose “Analyze” and enter a collection address for owner stats. |
-| **Pyth OHLC**     | 📊 Select "Hourly Summary", choose an interval (e.g., hourly, 4h, daily), and provide a mint address with start/end dates (YYYY-MM-DD) for OHLC data. |
-| **Tutorial**      | 🔰 Step through a multi-page guide on all core commands.      |
+| Menu Button       | Description                                                            |
+|-------------------|------------------------------------------------------------------------|
+| **Accounts**      | 👛 View known accounts or check balances by entering a wallet address. |
+| **Prices**        | 📊 Fetch top tokens or lookup a specific mint interactively.           |
+| **Chart**         | 📈 Select timeframe then input mint for price charts.                  |
+| **Holders**       | 👑 Tap to request top holders; then the bot shows full wallet addresses.|
+| **Fav Accts**     | ⭐ List your saved wallets; click one to view balance or go back.       |
+| **Fav Toks**      | ⭐ List your saved tokens; click one for details, holders, or go back.  |
+| **NFT Analytics** | 🖼 Analyze NFT collection owner stats.                                  |
+| **Pyth OHLC**     | ⚙️ Choose interval and provide mint + dates for OHLC data.            |
+| **Tutorial**      | 🎓 Step through a multi-page guide on all core commands.               |
 
 ---
 
@@ -83,28 +90,33 @@ For users who prefer buttons and guided prompts, VybeVigil supports fully intera
    ```bash
    git clone https://github.com/Ksschkw/vybe-telegram-bot.git
    cd vybe-telegram-bot
-   ```
+````
 
 2. **Install** dependencies:
+
    ```bash
    pip install -r requirements.txt
    ```
 
 3. **Configure** credentials:
-   - Get a **Vybe API Key** from your Vybe contest organizer.  
-   - Get a **Telegram Bot Token** from [@BotFather](https://t.me/BotFather).  
-   - Create a `.env` file:
-     ```
+
+   * Get a **Vybe API Key** from your Vybe contest organizer.
+   * Get a **Telegram Bot Token** from [@BotFather](https://t.me/BotFather).
+   * Create a `.env` file:
+
+     ```bash
      VYBE_API_KEY=your_api_key
      TELEGRAM_BOT_TOKEN=your_bot_token
      ```
 
 4. **Run** the bot locally:
+
    ```bash
    python bot.py
    ```
 
 5. **(Optional) Docker**:
+
    ```bash
    docker build -t vybe-bot .
    docker run --env-file .env vybe-bot
@@ -114,39 +126,45 @@ For users who prefer buttons and guided prompts, VybeVigil supports fully intera
 
 ## 🤖 Bot Commands
 
-| Command               | Parameters                       | Description                                               | Example                                                               |
-|-----------------------|----------------------------------|-----------------------------------------------------------|-----------------------------------------------------------------------|
-| `/start`              | None                             | Show introductory message and interactive menu           | `/start`                                                             |
-| `/balance`            | `<wallet_address>`               | Get SOL balance and token holdings                       | `/balance 4DDUJ1rA3Vk...`                                            |
-| `/prices`             | `[token_mint] [count]`           | Get token prices (specific or top list)                  | `/prices` <br> `/prices EPj... 15`                                   |
-| `/whalealert`         | `[threshold] [limit]`            | Show large transfers (default ≥ $1000, max 7)             | `/whalealert` <br> `/whalealert 500 3`                               |
-| `/tokendetails`       | `<mint_address>`                 | Get metadata and stats for a token                       | `/tokendetails EPj...`                                               |
-| `/topholders`         | `<mint_address> [count]`         | Show top holders of a token (default top 10)             | `/topholders EPj... 5`                                               |
-| `/chart`              | `<mint_address>`                 | Display price chart for a token (last 30 days)           | `/chart EPj...`                                                      |
-| `/nft_analysis`       | `<collection_address>`           | Analyze NFT collection ownership distribution             | `/nft_analysis 7VQo9H...`                                            |
-| `/tutorial`           | None                             | Shows a guided tutorial on how to use the bot            | `/tutorial`                                                         |
+| Command               | Parameters               | Description                                       |
+| --------------------- | ------------------------ | ------------------------------------------------- |
+| `/start`              | None                     | Show the main menu with buttons and command list. |
+| `/balance`            | `<wallet_address>`       | Get SOL balance and token holdings.               |
+| `/prices`             | `[token_mint] [count]`   | Get token prices (specific or top list).          |
+| `/whalealert`         | `[threshold] [limit]`    | Show large transfers (default ≥ \$1 000, max 7).  |
+| `/tokendetails`       | `<mint_address>`         | Get metadata and stats for a token.               |
+| `/topholders`         | `<mint_address> [count]` | Show top holders of a token (default top 10).     |
+| `/chart`              | `<mint_address>`         | Display price chart for a token (last 30 days).   |
+| `/nft_analysis`       | `<collection_address>`   | Analyze NFT collection ownership distribution.    |
+| `/addfavoriteaccount` | `<account_address>`      | Add a wallet to your favorites.                   |
+| `/favoriteaccounts`   | None                     | List and manage your favorite wallets.            |
+| `/addfavoritetoken`   | `<mint_address>`         | Add a token mint to your favorites.               |
+| `/favoritetokens`     | None                     | List and manage your favorite tokens.             |
+| `/pyth`               | `<feed_id>`              | Get real-time oracle feed data.                   |
+| `/tutorial`           | None                     | Shows a guided tutorial on how to use the bot.    |
+| `/commands`           | None                     | Display this complete command reference.          |
 
 ---
 
 ## 📷 Screenshots
 
-| START MENU                          | Whale Alerts      | Top Holders      |
-|-------------------------------------|-------------------|------------------|
+| START MENU                          | Whale Alerts                        | Top Holders                                   |
+| ----------------------------------- | ----------------------------------- | --------------------------------------------- |
 | ![Start](imagesforreadme/start.png) | ![Whale](imagesforreadme/whale.png) | ![TopHolders](imagesforreadme/topholders.png) |
 
-| Chart                                | Token Details     | Tutorial Pages   |
-|--------------------------------------|-------------------|------------------|
-| ![Chart](imagesforreadme/chart.png)  | ![Token](imagesforreadme/tokdeets.png) | ![Tut1](imagesforreadme/tutorial1.png)<br>![Tut2](imagesforreadme/tutorial2.png) |
+| Chart                               | Token Details                          | Tutorial Pages                                                                   |
+| ----------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------- |
+| ![Chart](imagesforreadme/chart.png) | ![Token](imagesforreadme/tokdeets.png) | ![Tut1](imagesforreadme/tutorial1.png)<br>![Tut2](imagesforreadme/tutorial2.png) |
 
 ---
 
 ## 💡 Innovation Highlights
 
-- Combines multiple Vybe API endpoints into a compact, user-friendly UX.  
-- Displays both raw data and formatted insights with Markdown and charts.  
-- Smart typo correction prevents silent failures and guides users.  
-- Fully interactive, button-driven menus for a modern chat experience.  
-- Modular design allows easy addition of new Vybe API features.
+* Combines multiple Vybe API endpoints into a compact, user-friendly UX.
+* Displays both raw data and formatted insights with Markdown and charts.
+* Smart typo correction prevents silent failures and guides users.
+* Fully interactive, button-driven menus—including “Favorites”—for a modern chat experience.
+* Modular design allows easy addition of new Vybe API features.
 
 ---
 
@@ -162,4 +180,4 @@ MIT License — free to use and modify. See the [LICENSE](LICENSE) file for deta
 
 ---
 
-Made with 💙 by [Kosisochukwu](https://kosisochukwu.onrender.com) using [Vybe Network](https://vybenetwork.xyz).  
+Made with 💙 by [Kosisochukwu](https://kosisochukwu.onrender.com) using [Vybe Network](https://vybenetwork.xyz).
