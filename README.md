@@ -90,7 +90,6 @@ Tap `/start` to open the main menu, then choose any of these buttons:
    ```bash
    git clone https://github.com/Ksschkw/vybe-telegram-bot.git
    cd vybe-telegram-bot
-````
 
 2. **Install** dependencies:
 
